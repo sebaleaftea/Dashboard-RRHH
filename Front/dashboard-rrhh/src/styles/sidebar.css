@@ -1,19 +1,37 @@
-/* Sidebar component styles */
+/* Sidebar base */
 .sidebar-app {
-  width: 280px;
-  background-color: #fff;
-  border-right: 1px solid rgba(0,0,0,0.1);
+  background-color: #0f172a;      /* fondo (ej. azul muy oscuro) */
+  color: #e2e8f0;                 /* texto */
 }
 
-.sidebar-app .sidebar-header {
-  font-weight: 600;
+/* Header del sidebar */
+.sidebar-header {
+  background-color: #111827;      /* fondo del header */
+  color: #ffffff;
 }
 
-.sidebar-app .nav button {
-  width: 100%;
+/* Botones del menú */
+.sidebar-app .btn {
+  color: #e2e8f0;
 }
 
-/* Desktop: ensure visible */
+.sidebar-app .btn.bg-transparent:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Item activo */
+.sidebar-app .btn.text-primary,
+.sidebar-app .btn.bg-light {
+  background-color: rgba(59, 130, 246, 0.15) !important; /* azul primary translúcido */
+  color: #3b82f6 !important;                             /* primary */
+}
+
+/* Línea separadora superior */
+.sidebar-app .border-top {
+  border-top-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* En desktop siempre visible */
 @media (min-width: 992px) {
   .sidebar-fixed {
     transform: translateX(0) !important;

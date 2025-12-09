@@ -1,104 +1,93 @@
-/* propiedad responsiva*/
-:root{
-    --space-1: 8px;
-    --space-2: 16px;
-    --space-3: 24px;
-    --space-4: 12px;
-    --font-base: 16px;
+.login-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url('../assets/background-login.avif');
+    padding: 15px;
 }
 
-@media (min-width: 480px){
-  :root{ --font-base: 17px; }
-}
-@media (min-width: 768px){
-  :root{ --font-base: 18px; }
-}
-
-html { font-size: var(--font-base); }
-
-/* Estilo para el login de la paguina */
-
-/*Al ser el login page el padre de la estrctura este le dara el centrado a la vista*/
-.login-page{
-    display: grid;
-    min-height: 100dvh;
-    place-items: center;
-    background-image: url("../assets/background-login.avif");
-    background-color: rgb(47, 181, 134);
-    padding: 16px;
-    font-family: "coco", Sans-serif;;
-}
-
-/* Cards para el login*/
 .login-card{
-    width: 100%;
-    max-width: 420px;;
-    background-color: #405bbc;
-    border: 1px solid #000001;
+    background: white;
+    padding: 2.5rem;
     border-radius: 12px;
-    padding: 28px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-header{
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo{
+    width: 180px;
+    height: auto;
+    margin-bottom: 1rem;
+    object-fit: contain;
 }
 
 .login-title{
-    margin: 0 0 16px;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    color: #ffffff;
+    color: #1a1a1a;
+    margin-top: 1rem;
 }
 
-/* Formulario*/
-.form-group{
-    display: grid;
-    gap: 8px;
-    margin-bottom: 16px;
+.login-subtitle {
+  color: #666;
+  font-size: 0.95rem;
 }
 
-label{
-    font-size: 0.9rem;
-    color: #ffffff;
-    font-family: "coco", Sans-serif;
+.form-group {
+  margin-bottom: 1.25rem;
 }
 
-input{
-    appearance: none;
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #4a4a4a;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-control{
     width: 100%;
-    border: 1px solid #5387d4;
+    padding: 0.75rem 1rem;
+    border: 1px solid #1e1e1e;
     border-radius: 8px;
-    padding: 8px 5px;
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color 120ms ease, box-shadow 120ms ease;
-    background: #fff;
-}
-
-input:focus{
-    border-color: #69928b;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
-}
-
-
-/* Estilo para el boton de aceptacion*/
-.submit-btn{
-    width: 100%;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 14px;
     font-size: 1rem;
-    font-weight: 600;
-    background-color: #fff;
-    color: rgb(69, 80, 193);
-    cursor: pointer;
-    transition: filter 140ms ease;
-    filter: brightness(150%);
-    
+    transition: border-color 0.3s;
 }
 
-.submit-btn:disabled{
-    opacity: 0.4;
-    cursor: not-allowed;
+.form-control:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
 }
 
-.submit-btn:not(:disabled):hover{
-    filter: brightness(0.95)
+.btn-primary {
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  padding: 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #842029;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
 }

@@ -8,6 +8,10 @@ export function Sidebar({ isOpen, onClose, activeSection, onSectionChange }) {
     { key: 'dashboard', icon: 'bi-speedometer2', label: 'Dashboard' },
     { key: 'empleados', icon: 'bi-people', label: 'Empleados' },
     { key: 'reportes', icon: 'bi-bar-chart', label: 'Reportes' },
+    { key: 'item x', icon: 'bi-bar-chart', label: 'item x' },
+    { key: 'item y', icon: 'bi-bar-chart', label: 'item y' },
+    { key: 'item z', icon: 'bi-bar-chart', label: 'item z' },
+    { key: 'item f', icon: 'bi-bar-chart', label: 'item f' },
   ];
 
   return (
@@ -31,7 +35,7 @@ export function Sidebar({ isOpen, onClose, activeSection, onSectionChange }) {
         aria-label="Sidebar"
       >
         <div className="d-flex align-items-center justify-content-between px-3 py-3 border-bottom sidebar-header">
-          <span className="fw-semibold">RRHH</span>
+          <span className="fw-semibold">Panel RRHH</span>
           <button className="btn btn-light d-lg-none" onClick={onClose} aria-label="Cerrar menú">
             <i className="bi bi-x-lg"></i>
           </button>

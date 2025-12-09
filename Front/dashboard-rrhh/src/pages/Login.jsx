@@ -1,43 +1,64 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../styles/login.css";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../styles/login.css';
+import logo from '../assets/logo.png';
 
-const Login = () => {
-  const [form, setForm] = useState({ username: "", password: "" });
+export default function Login() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const isValid = form.username.trim() !== "" && form.password.trim() !== "";
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }
-
-  function handleSubmit(e) {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (!isValid) {
-      console.log("Login invalido");
-      return;
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:8081/api/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Enviamos los datos tal como los espera tu Backend (User model)
+        body: JSON.stringify({ 
+          email: email, 
+          passwordHash: password // Tu backend espera 'passwordHash'
+        }),
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        // Guardamos sesión (opcional: guardar token o user en localStorage)
+        localStorage.setItem('user', JSON.stringify(userData));
+        navigate('/home');
+      } else {
+        setError('Credenciales incorrectas. Solo personal autorizado.');
+      }
+    } catch (err) {
+      console.error("Error de conexión:", err);
+      setError('Error al conectar con el servidor.');
     }
-    navigate("/home");
-  }
+  };
 
   return (
-    <div className="login-page">
+    <div className="login-container">
       <div className="login-card">
-        <h1 className="login-title">Iniciar Sesion</h1>
+        <div className="login-header">
+          <img src={logo} alt="Logo" className="login-logo" />
+          <h2 className="login-title">Bienvenido</h2>
+          <p className="login-subtitle">Ingresa tus credenciales para continuar</p>
+        </div>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            <label htmlFor="username">Usuario</label>
+            <label htmlFor="email">Correo Electrónico</label>
             <input
-              id="username"
-              name="username"
-              type="text"
-              value={form.username}
-              onChange={handleChange}
-              placeholder="ingrese su nombre de usuario"
-              autoComplete="username"
+              id="email"
+              type="email"
+              className="form-control"
+              placeholder="nombre@empresa.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -46,24 +67,22 @@ const Login = () => {
             <label htmlFor="password">Contraseña</label>
             <input
               id="password"
-              name="password"
               type="password"
-              value={form.password}
-              onChange={handleChange}
+              className="form-control"
               placeholder="••••••••"
-              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
             />
           </div>
 
-          <button type="submit" className="submit-btn" disabled={!isValid}>
-            Ingresar
+          {error && <div className="alert alert-danger mt-3">{error}</div>}
+
+          <button type="submit" className="btn btn-primary w-100 mt-4">
+            Iniciar Sesión
           </button>
         </form>
       </div>
     </div>
   );
-};
-
-export default Login;
+}
