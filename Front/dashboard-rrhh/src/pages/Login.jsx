@@ -5,7 +5,8 @@ import logo from '../assets/logo.png';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  // Cambiamos el estado de email a name
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -19,20 +20,19 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        // Enviamos los datos tal como los espera tu Backend (User model)
+        // Enviamos 'name' en lugar de 'email'
         body: JSON.stringify({ 
-          email: email, 
-          passwordHash: password // Tu backend espera 'passwordHash'
+          name: name, 
+          passwordHash: password 
         }),
       });
 
       if (response.ok) {
         const userData = await response.json();
-        // Guardamos sesión (opcional: guardar token o user en localStorage)
         localStorage.setItem('user', JSON.stringify(userData));
         navigate('/home');
       } else {
-        setError('Credenciales incorrectas. Solo personal autorizado.');
+        setError('Usuario o contraseña incorrectos.');
       }
     } catch (err) {
       console.error("Error de conexión:", err);
@@ -51,14 +51,15 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            <label htmlFor="email">Correo Electrónico</label>
+            {/* Cambiamos la etiqueta y el input */}
+            <label htmlFor="username">Usuario</label>
             <input
-              id="email"
-              type="email"
+              id="username"
+              type="text" // Tipo texto, no email
               className="form-control"
-              placeholder="nombre@empresa.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Ej: Admin"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
