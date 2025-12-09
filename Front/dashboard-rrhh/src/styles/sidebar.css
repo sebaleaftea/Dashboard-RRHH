@@ -1,0 +1,21 @@
+/* Sidebar component styles */
+.sidebar-app {
+  width: 280px;
+  background-color: #fff;
+  border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.sidebar-app .sidebar-header {
+  font-weight: 600;
+}
+
+.sidebar-app .nav button {
+  width: 100%;
+}
+
+/* Desktop: ensure visible */
+@media (min-width: 992px) {
+  .sidebar-fixed {
+    transform: translateX(0) !important;
+  }
+}
