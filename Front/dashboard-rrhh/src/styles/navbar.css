@@ -1,4 +1,17 @@
 /* Navbar component styles */
+.navbar {
+  /* Cambia 'fixed' por 'sticky' */
+  position: sticky; 
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  
+  /* Asegura que ocupe el ancho disponible del contenedor padre, no de la pantalla */
+  width: 100%; 
+  
+  /* Si tenías 'left: 0', quítalo o coméntalo */
+  /* left: 0; */
+}
 .navbar-app {
   box-shadow: 0 1px 2px rgba(15, 15, 15, 0.153);
 }

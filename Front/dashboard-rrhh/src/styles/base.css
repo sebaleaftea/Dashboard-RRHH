@@ -18,3 +18,51 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* =========================================
+   LAYOUT DEL DASHBOARD (Agregado)
+   ========================================= */
+
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #f8f9fa; /* Fondo gris suave para toda la app */
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Contenedor principal (Navbar + Contenido) */
+.main-content {
+  transition: margin-left 300ms ease-in-out, width 300ms ease-in-out;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ESTA ES LA REGLA CLAVE:
+   En pantallas grandes, si el sidebar está abierto, 
+   empujamos el contenido 280px a la derecha */
+@media (min-width: 992px) {
+  .main-content.sidebar-open {
+    margin-left: 280px; /* Debe coincidir con el ancho definido en Sidebar.jsx */
+    width: calc(100% - 280px);
+  }
+}
+
+/* En móviles, el sidebar se superpone, así que no empujamos el contenido */
+@media (max-width: 991.98px) {
+  .main-content.sidebar-open {
+    margin-left: 0;
+  }
+}
+
+/* Espaciado interno para las páginas */
+.content-wrapper {
+  padding: 1.5rem;
+  width: 100%;
+}
+
+/* Estilos básicos para tablas si no usas Bootstrap completo */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

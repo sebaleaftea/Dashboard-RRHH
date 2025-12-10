@@ -57,7 +57,7 @@ export default function Login() {
               id="username"
               type="text" // Tipo texto, no email
               className="form-control"
-              placeholder="Ej: Admin"
+              placeholder="Ej: Pedrito23"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required

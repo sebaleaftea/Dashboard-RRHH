@@ -21,6 +21,7 @@
     <module>microservice-eureka</module>
     <module>microservice-gateway</module>
     <module>microservice-user</module>
+    <module>microservice-employee</module>
   
   </modules><!--El microservicio ya es un modulo de nuestro padre-->
 

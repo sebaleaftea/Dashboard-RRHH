@@ -1,9 +1,12 @@
 /* Sidebar base */
 .sidebar-app {
-  background-color: #0f172a;      /* fondo (ej. azul muy oscuro) */
-  color: #e2e8f0;                 /* texto */
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 280px;
+  z-index: 1041;
 }
-
 /* Header del sidebar */
 .sidebar-header {
   background-color: #111827;      /* fondo del header */
@@ -33,7 +36,7 @@
 
 /* En desktop siempre visible */
 @media (min-width: 992px) {
-  .sidebar-fixed {
-    transform: translateX(0) !important;
+  .main-content {
+    margin-left: 280px; /* igual al ancho del sidebar */
   }
 }
