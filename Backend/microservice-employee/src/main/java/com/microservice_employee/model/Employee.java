@@ -1,5 +1,7 @@
 package com.microservice_employee.model;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +20,9 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable=false, unique=true)
+    private String rut;
+
     @Column(nullable=false)
     private String name;
 
@@ -25,13 +30,31 @@ public class Employee {
     private String lastname;
 
     @Column(nullable=false)
-    private String email;
+    private String cargo;
 
     @Column(nullable=false)
-    private String contract;
+    private Integer cod_centro_costo;
 
     @Column(nullable=false)
-    private String position;
+    private String nombre_centro_costo;
 
-    
+    @Column(nullable=false)
+    private String fecha_ingreso;
+
+    @Column(nullable=false)
+    private String sucursal;
+
+    @Column(nullable=false)
+    private String jefe;
+
+     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Vacation> vacations;
+
+    // Relación con License
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<License> licenses;
+
+    @ManyToOne
+    @JoinColumn(name = "centro_costo_codigo", referencedColumnName = "codigo")
+    private CentroCosto centroCosto;
 }

@@ -30,4 +30,14 @@ public class EmployeeService {
         employeeRepository.deleteById(id);
     }
 
+    //Metodo para el update de empleado
+    public Employee update(Long id, Employee emp) {
+    Employee existing = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
+    existing.setName(emp.getName());
+    existing.setPosition(emp.getPosition());
+    existing.setEmail(emp.getEmail());
+    // Agrega aquí otros campos que quieras actualizar
+    return employeeRepository.save(existing);
+}
+
 }

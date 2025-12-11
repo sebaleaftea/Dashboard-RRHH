@@ -1,44 +1,260 @@
-import React, { useEffect, useState } from 'react';
-import { EmployeesList } from '../components/Employees';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import ModalLista from '../components/ModalLista';
+
+const API_URL = 'http://localhost:8082/api/v1/employees';
 
 export default function Empleados() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    name: '',
+    lastname: '',
+    position: '',
+    email: '',
+    contract: ''
+  });
+  const [editId, setEditId] = useState(null);
+
+  // Estados para el modal de vacaciones/licencias
+  const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalItems, setModalItems] = useState([]);
+  const [modalTipo, setModalTipo] = useState('');
+
+  const fetchEmployees = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API_URL}/all`);
+      setEmployees(res.data);
+    } catch (err) {
+      console.error('Error obteniendo empleados:', err);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchEmployees = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch('http://localhost:8082/api/employee/all');
-        if (!res.ok) throw new Error('Respuesta no OK');
-        const data = await res.json();
-        setEmployees(data);
-      } catch (err) {
-        console.error('Error cargando empleados:', err);
-        setEmployees([
-          { id: 1, name: 'Juan Perez', position: 'Backend Dev', email: 'juan@test.com' },
-          { id: 2, name: 'Maria Lopez', position: 'Frontend Dev', email: 'maria@test.com' },
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEmployees();
   }, []);
 
+  const handleChange = e => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    try {
+      if (editId) {
+        await axios.put(`${API_URL}/${editId}`, form);
+      } else {
+        await axios.post(`${API_URL}/create`, form);
+      }
+      setForm({
+        name: '',
+        lastname: '',
+        position: '',
+        email: '',
+        contract: ''
+      });
+      setEditId(null);
+      fetchEmployees();
+    } catch (err) {
+      console.error('Error guardando empleado:', err);
+    }
+  };
+
+  const handleEdit = emp => {
+    setForm({
+      name: emp.name || '',
+      lastname: emp.lastname || '',
+      position: emp.position || '',
+      email: emp.email || '',
+      contract: emp.contract || ''
+    });
+    setEditId(emp.id);
+  };
+
+  const handleDelete = async id => {
+    try {
+      await axios.delete(`${API_URL}/delete/${id}`);
+      fetchEmployees();
+    } catch (err) {
+      console.error('Error eliminando empleado:', err);
+    }
+  };
+
+  // Handlers para mostrar vacaciones y licencias en el modal
+  const handleShowVacaciones = (vacations) => {
+    setModalTitle('Vacaciones');
+    setModalItems(vacations);
+    setModalTipo('vacaciones');
+    setShowModal(true);
+  };
+
+  const handleShowLicencias = (licenses) => {
+    setModalTitle('Licencias');
+    setModalItems(licenses);
+    setModalTipo('licencias');
+    setShowModal(true);
+  };
+
   return (
-    <>
-      <h2 className="mb-4">Gestión de Empleados</h2>
-      {loading ? (
-        <div className="text-center p-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Cargando...</span>
-          </div>
+    <div className="container mt-4">
+      <h2 className="mb-4">Empleados</h2>
+      <form className="row g-3 mb-4" onSubmit={handleSubmit}>
+        <div className="col-md-2">
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            className="form-control"
+            placeholder="Nombre"
+            required
+          />
         </div>
+        <div className="col-md-2">
+          <input
+            name="lastname"
+            value={form.lastname}
+            onChange={handleChange}
+            className="form-control"
+            placeholder="Apellido"
+            required
+          />
+        </div>
+        <div className="col-md-2">
+          <input
+            name="position"
+            value={form.position}
+            onChange={handleChange}
+            className="form-control"
+            placeholder="Puesto"
+            required
+          />
+        </div>
+        <div className="col-md-3">
+          <input
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            className="form-control"
+            placeholder="Email"
+            required
+          />
+        </div>
+        <div className="col-md-2">
+          <input
+            name="contract"
+            value={form.contract}
+            onChange={handleChange}
+            className="form-control"
+            placeholder="Contrato"
+            required
+          />
+        </div>
+        <div className="col-md-1 d-flex align-items-center">
+          <button type="submit" className={`btn ${editId ? 'btn-warning' : 'btn-primary'} me-2`}>
+            {editId ? 'Actualizar' : 'Crear'}
+          </button>
+          {editId && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                setForm({
+                  name: '',
+                  lastname: '',
+                  position: '',
+                  email: '',
+                  contract: ''
+                });
+                setEditId(null);
+              }}
+            >
+              Cancelar
+            </button>
+          )}
+        </div>
+      </form>
+      {loading ? (
+        <p>Cargando empleados...</p>
       ) : (
-        <EmployeesList employees={employees} />
+        <div className="table-responsive">
+          <table className="table table-striped table-bordered align-middle">
+            <thead className="table-dark">
+              <tr>
+                <th>RUT</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Cargo</th>
+                <th>Código Centro Costo</th>
+                <th>Nombre Centro Costo</th>
+                <th>Sucursal</th>
+                <th>Jefe</th>
+                <th>Fecha Ingreso</th>
+                <th>Vacaciones</th>
+                <th>Licencias</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees.map(emp => (
+                <tr key={emp.id}>
+                  <td>{emp.rut}</td>
+                  <td>{emp.name}</td>
+                  <td>{emp.lastname}</td>
+                  <td>{emp.cargo}</td>
+                  <td>{emp.centroCosto?.codigo || ''}</td>
+                  <td>{emp.centroCosto?.nombre || ''}</td>
+                  <td>{emp.sucursal}</td>
+                  <td>{emp.jefe}</td>
+                  <td>{emp.fecha_ingreso}</td>
+                  <td>
+                    <button
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => handleShowVacaciones(emp.vacations)}
+                    >
+                      Ver Vacaciones
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-sm btn-outline-success"
+                      onClick={() => handleShowLicencias(emp.licenses)}
+                    >
+                      Ver Licencias
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-sm btn-info me-2"
+                      onClick={() => handleEdit(emp)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDelete(emp.id)}
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
-    </>
+      <ModalLista
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        title={modalTitle}
+        items={modalItems}
+        tipo={modalTipo}
+      />
+    </div>
   );
 }

@@ -1,3 +1,5 @@
 spring:
   application:
-    name: microservice-employee
+    name: msvc-employee
+  config:
+    import: optional:configserver:http://localhost:8080

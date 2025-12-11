@@ -15,9 +15,9 @@ spring:
           predicates:             
             - Path=/api/v1/users/**
         - id: employees
-          uri: http://localhost:8100
+          uri: http://localhost:8082
           predicates:             
-            - Path=/api/v1/employee/**
+            - Path=/api/v1/employees/**
   cliente:
     register-with-eureka: false
  
