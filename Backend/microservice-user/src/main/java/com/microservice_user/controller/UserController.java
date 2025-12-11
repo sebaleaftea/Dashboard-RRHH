@@ -2,9 +2,6 @@ package com.microservice_user.controller;
 
 import com.microservice_user.model.User;
 import com.microservice_user.service.UserService;
-
-import jakarta.ws.rs.Path;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
