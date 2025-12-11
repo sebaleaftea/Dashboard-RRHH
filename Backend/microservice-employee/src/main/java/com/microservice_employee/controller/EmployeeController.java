@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("/api/employee")
+@RequestMapping("/api/v1/employee")
 @CrossOrigin(origins = "http://localhost:5173") 
 public class EmployeeController {
 
