@@ -1,5 +1,6 @@
 package com.microservice_employee.model;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -30,13 +31,16 @@ public class Employee {
     private String lastname;
 
     @Column(nullable=false)
+    private String sexo;
+
+    @Column(nullable=false)
+    private boolean discapacidad;
+
+    @Column(nullable=false)
+    private LocalDate fecha_nacimiento;
+
+    @Column(nullable=false)
     private String cargo;
-
-    @Column(nullable=false)
-    private Integer cod_centro_costo;
-
-    @Column(nullable=false)
-    private String nombre_centro_costo;
 
     @Column(nullable=false)
     private String fecha_ingreso;
@@ -46,7 +50,11 @@ public class Employee {
 
     @Column(nullable=false)
     private String jefe;
-
+    
+    @ManyToOne
+    @JoinColumn(name = "centro_costo_codigo", referencedColumnName = "codigo")
+    private CentroCosto centroCosto;
+    
      @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vacation> vacations;
 
@@ -54,7 +62,4 @@ public class Employee {
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<License> licenses;
 
-    @ManyToOne
-    @JoinColumn(name = "centro_costo_codigo", referencedColumnName = "codigo")
-    private CentroCosto centroCosto;
 }

@@ -8,9 +8,10 @@ export function Sidebar({ isOpen, onClose }) {
   const items = [
     { key: 'dashboard', icon: 'bi-speedometer2', label: 'Dashboard', path: '/home' },
     { key: 'empleados', icon: 'bi-people', label: 'Empleados', path: '/empleados' },
-    { key: 'reportes', icon: 'bi-bar-chart', label: 'Reportes', path: '/reportes' },
-    { key: 'item x', icon: 'bi-bar-chart', label: 'item x', path: '#' },
-    { key: 'item y', icon: 'bi-bar-chart', label: 'item y', path: '#' },
+    { key: 'reclutamiento', icon: 'bi-bar-chart', label: 'Reclutamiento', path: '/reclutamiento' },
+    { key: 'reporte-discapacidad', icon: 'bi-pie-chart', label: 'Reporte Discapacidad', path: '/reporte-discapacidad' },
+    { key: 'reporte-genero', icon: 'bi bi-gender-ambiguous', label: 'Reporte Género', path: '/reporte-genero' },
+    { key: 'reporte-edades', icon: 'bi-graph-up', label: 'Reporte Edades', path: '/reporte-edades' },
   ];
 
   const handleNavigation = (path) => {
@@ -40,6 +41,8 @@ export function Sidebar({ isOpen, onClose }) {
           zIndex: 1041,
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 300ms ease-in-out',
+          display: 'flex',           // <-- agregado
+          flexDirection: 'column',   // <-- agregado
         }}
         aria-label="Sidebar"
       >
@@ -65,8 +68,8 @@ export function Sidebar({ isOpen, onClose }) {
           ))}
         </nav>
 
-        <div className="px-3 py-3 border-top mt-auto">
-          <small className="text-muted">© {new Date().getFullYear()} RRHH</small>
+        <div className="px-3 py-3 border-top mt-auto" style={{ marginTop: 'auto' }}>
+          <small className="text-muted">© {new Date().getFullYear()} Tiendas Mass Chile</small>
           <button 
             className="btn btn-link text-danger text-decoration-none p-0 d-block mt-2"
             onClick={() => {

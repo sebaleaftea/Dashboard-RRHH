@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Data
 @Entity
 @AllArgsConstructor
@@ -20,6 +22,7 @@ public class Vacation {
     private LocalDate endDate;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
+    @JoinColumn(name = "employee_rut", referencedColumnName = "rut")
+    @JsonIgnore
     private Employee employee;
 }

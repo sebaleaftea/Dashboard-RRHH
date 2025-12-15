@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ModalLista from '../components/ModalLista';
+import "../styles/employees.css";
+
 
 const API_URL = 'http://localhost:8082/api/v1/employees';
 
@@ -22,13 +24,28 @@ export default function Empleados() {
   const [modalItems, setModalItems] = useState([]);
   const [modalTipo, setModalTipo] = useState('');
 
+  // Estados para búsqueda y paginación
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
   const fetchEmployees = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_URL}/all`);
-      setEmployees(res.data);
+      console.log('Respuesta backend:', res.data); 
+
+      // Ajusta aquí según la estructura real de la respuesta:
+      if (Array.isArray(res.data)) {
+        setEmployees(res.data);
+      } else if (Array.isArray(res.data.employees)) {
+        setEmployees(res.data.employees);
+      } else {
+        setEmployees([]);
+      }
     } catch (err) {
       console.error('Error obteniendo empleados:', err);
+      setEmployees([]); 
     }
     setLoading(false);
   };
@@ -100,6 +117,20 @@ export default function Empleados() {
     setModalTipo('licencias');
     setShowModal(true);
   };
+
+  // --- Búsqueda y paginación ---
+  const filtered = Array.isArray(employees) ? employees.filter(emp =>
+    (emp.rut && emp.rut.toLowerCase().includes(search.toLowerCase())) ||
+    (emp.name && emp.name.toLowerCase().includes(search.toLowerCase())) ||
+    (emp.lastname && emp.lastname.toLowerCase().includes(search.toLowerCase())) ||
+    (emp.cargo && emp.cargo.toLowerCase().includes(search.toLowerCase())) ||
+    (emp.centroCosto?.nombre && emp.centroCosto.nombre.toLowerCase().includes(search.toLowerCase()))
+  ) : [];
+
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handlePageChange = (page) => setCurrentPage(page);
 
   return (
     <div className="container mt-4">
@@ -179,8 +210,28 @@ export default function Empleados() {
           )}
         </div>
       </form>
+      {/* Buscador */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <input
+          type="text"
+          className="form-control w-25"
+          placeholder="Buscar empleado..."
+          value={search}
+          onChange={e => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
+        <span>
+          Mostrando {paginated.length} de {filtered.length} empleados
+        </span>
+      </div>
       {loading ? (
-        <p>Cargando empleados...</p>
+        <div className="text-center my-4">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </div>
+        </div>
       ) : (
         <div className="table-responsive">
           <table className="table table-striped table-bordered align-middle">
@@ -201,52 +252,72 @@ export default function Empleados() {
               </tr>
             </thead>
             <tbody>
-              {employees.map(emp => (
-                <tr key={emp.id}>
-                  <td>{emp.rut}</td>
-                  <td>{emp.name}</td>
-                  <td>{emp.lastname}</td>
-                  <td>{emp.cargo}</td>
-                  <td>{emp.centroCosto?.codigo || ''}</td>
-                  <td>{emp.centroCosto?.nombre || ''}</td>
-                  <td>{emp.sucursal}</td>
-                  <td>{emp.jefe}</td>
-                  <td>{emp.fecha_ingreso}</td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={() => handleShowVacaciones(emp.vacations)}
-                    >
-                      Ver Vacaciones
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-outline-success"
-                      onClick={() => handleShowLicencias(emp.licenses)}
-                    >
-                      Ver Licencias
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-info me-2"
-                      onClick={() => handleEdit(emp)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleDelete(emp.id)}
-                    >
-                      Eliminar
-                    </button>
-                  </td>
+              {paginated.length === 0 ? (
+                <tr>
+                  <td colSpan={12} className="text-center">No hay empleados que coincidan con la búsqueda.</td>
                 </tr>
-              ))}
+              ) : (
+                paginated.map(emp => (
+                  <tr key={emp.id}>
+                    <td>{emp.rut}</td>
+                    <td>{emp.name}</td>
+                    <td>{emp.lastname}</td>
+                    <td>{emp.cargo}</td>
+                    <td>{emp.centroCosto?.codigo || ''}</td>
+                    <td>{emp.centroCosto?.nombre || ''}</td>
+                    <td>{emp.sucursal}</td>
+                    <td>{emp.jefe}</td>
+                    <td>{emp.fecha_ingreso}</td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => handleShowVacaciones(emp.vacations)}
+                      >
+                        Ver Vacaciones
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-outline-success"
+                        onClick={() => handleShowLicencias(emp.licenses)}
+                      >
+                        Ver Licencias
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-info me-2"
+                        onClick={() => handleEdit(emp)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDelete(emp.id)}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
+      )}
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <nav>
+          <ul className="pagination justify-content-center">
+            {[...Array(totalPages)].map((_, idx) => (
+              <li key={idx} className={`page-item${currentPage === idx + 1 ? ' active' : ''}`}>
+                <button className="page-link" onClick={() => handlePageChange(idx + 1)}>
+                  {idx + 1}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
       )}
       <ModalLista
         show={showModal}

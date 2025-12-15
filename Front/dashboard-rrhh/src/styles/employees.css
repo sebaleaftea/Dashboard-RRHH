@@ -1,0 +1,13 @@
+.table th, .table td {
+  vertical-align: middle !important;
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .table th, .table td {
+    font-size: 0.9rem;
+    padding: 0.3rem;
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+}

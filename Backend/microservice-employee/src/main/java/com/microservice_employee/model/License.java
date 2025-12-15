@@ -2,6 +2,9 @@ package com.microservice_employee.model;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,7 +33,8 @@ public class License {
     private LocalDate endDate;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
+    @JoinColumn(name = "employee_rut", referencedColumnName = "rut")
+    @JsonIgnore
     private Employee employee;
 
 }
