@@ -15,7 +15,15 @@ export default function ModalLista({ show, onClose, title, items, tipo }) {
               <ul>
                 {items.map(item => (
                   <li key={item.id}>
-                    Desde: {item.startDate} - Hasta: {item.endDate}
+                    {tipo === 'licencias' ? (
+                      <>
+                        Desde: {item.fechaDesde} - Hasta: {item.fechaHasta}
+                      </>
+                    ) : (
+                      <>
+                        Días normales: {item.diasNormales ?? 0} | Progresivos: {item.diasProgresivos ?? 0} | Restantes: {item.diasRestantes ?? 0} | Zona extrema: {item.diasZonaExtrema ?? 0}
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>

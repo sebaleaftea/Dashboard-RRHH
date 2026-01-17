@@ -2,6 +2,24 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Spring Boot-MicroserviceEmployeeApplication<microservice-employee>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.microservice_employee.MicroserviceEmployeeApplication",
+            "projectName": "microservice-employee",
+            "args": "",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "cloudsql",
+                "DB_USERNAME": "grh-bdduser",
+                "DB_PASSWORD": "c_}2ysUR\"6dXEk]o",
+                "DB_HOST": "127.0.0.1",
+                "DB_PORT": "5433",
+                "DB_NAME": "grh",
+                "SPRING_FLYWAY_ENABLED": "false"
+            }
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-MicroserviceStudentApplication<microservice-student>",
             "request": "launch",
             "cwd": "${workspaceFolder}",

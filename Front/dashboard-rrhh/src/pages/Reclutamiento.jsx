@@ -1,17 +1,11 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { normalizarCargo } from '../utils/cargos';
 
-const API_URL = 'http://localhost:8082/api/v1/employees/all';
+// Usamos el endpoint normalizado de contratos activos desde la BDD
+const API_URL = 'http://localhost:8082/api/db/contratos/activos';
 
-// filtro para pasar los cargos antiguos a nuevos
-const MAPA_CARGOS = {
-  'Vendedor-Reponedor-Cajero': 'Operador de tienda',
-  'Vendedor Reponedor Cajero 20': 'Operador de tienda 16',
-  'Vendedor Reponedor Cajero 30': 'Operador de tienda 24',
-  'Administrador Jr Trainee': 'Administrador de tienda Jr',
-  'SUB-ENCARGADO DE TIENDA': 'Administrador de tienda Jr',
-  'Operador de tienda Trainee': 'Operador de tienda',
-};
+// El mapeo de cargos ahora se comparte en utils/cargos.js
 
 //Cargos minimos requeridos e ideales por sucursales
 const CARGOS_REQUERIDOS = [
@@ -29,34 +23,42 @@ export default function Reclutamiento() {
 
   useEffect(() => {
     axios.get(API_URL).then(res => {
-      const empleados = res.data;
+      const contratos = Array.isArray(res.data) ? res.data : [];
 
-      // llamo a la función de agrupamiento y cálculo
+      // Adaptamos a una lista de "empleados activos" con los campos necesarios (por centro de costo)
+      const empleados = contratos.map(c => ({
+        centro: c.centroCostoNombre || 'Sin centro de costo',
+        jefe: c.jefeNombre || '',
+        cargo: normalizarCargo(c.cargo),
+      }));
+
+      // Agrupamiento por centro de costo
       const agrupado = {};
       empleados.forEach(emp => {
-        // mapeo de cargo para traducir a nuevos nombres
-        const cargoTraducido = MAPA_CARGOS[emp.cargo] || emp.cargo;
-        emp.cargo = cargoTraducido;
-
-        const sucursalKey = emp.sucursal ? emp.sucursal.trim().toLowerCase() : 'sin_sucursal';
-        if (!agrupado[sucursalKey]) {
-          agrupado[sucursalKey] = {
-            nombre: emp.sucursal,
-            jefe: emp.jefe,
+        const centroKey = emp.centro ? emp.centro.trim().toLowerCase() : 'sin_centro';
+        if (!agrupado[centroKey]) {
+          agrupado[centroKey] = {
+            nombre: emp.centro,
+            jefe: '',
             empleados: [],
           };
         }
-        agrupado[sucursalKey].empleados.push(emp);
+        // preferimos un jefe no vacío; si hay varios, nos quedamos con el primero válido
+        if (!agrupado[centroKey].jefe && emp.jefe) {
+          agrupado[centroKey].jefe = emp.jefe;
+        }
+        agrupado[centroKey].empleados.push(emp);
       });
 
-      // Calcula dotación y cargos por sucursal
+      // Calcula dotación y cargos por centro de costo
+      const requeridosTotales = CARGOS_REQUERIDOS.reduce((acc, it) => acc + (it.requeridos || 0), 0);
       const sucursalesArr = Object.values(agrupado).map(data => {
         const dotacionVigente = data.empleados.length;
-        const dotacionEsperada = 7;
+        const dotacionEsperada = requeridosTotales; // suma de cargos requeridos
         const desviacion = dotacionEsperada === 0
           ? 0
           : ((dotacionVigente - dotacionEsperada) / dotacionEsperada) * 100;
-        // Cuenta cargos actuales
+        // Cuenta cargos actuales (post-mapeo)
         const cargosActuales = {};
         data.empleados.forEach(emp => {
           cargosActuales[emp.cargo] = (cargosActuales[emp.cargo] || 0) + 1;
@@ -74,19 +76,19 @@ export default function Reclutamiento() {
     });
   }, []);
 
-  // Filtra sucursales según búsqueda
+  // Filtra centros según búsqueda
   const sucursalesFiltradas = sucursales.filter(suc =>
     (suc.nombre || '').toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Reclutamiento por Sucursal</h2>
+      <h2 className="mb-4">Reclutamiento por Centro de Costo</h2>
       <div className="mb-3">
         <input
           type="text"
           className="form-control"
-          placeholder="Buscar sucursal..."
+          placeholder="Buscar centro de costo..."
           value={busqueda}
           onChange={e => setBusqueda(e.target.value)}
         />
@@ -95,7 +97,7 @@ export default function Reclutamiento() {
         <table className="table table-bordered align-middle">
           <thead className="table-dark">
             <tr>
-              <th>Sucursal</th>
+              <th>Centro de Costo</th>
               <th>Jefe</th>
               <th>Dotación Vigente</th>
               <th>Dotación Esperada</th>

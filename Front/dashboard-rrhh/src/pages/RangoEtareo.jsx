@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8082/api/v1/employees/all';
+const API_URL = 'http://localhost:8082/api/db/empleados/activos';
 
 function calcularEdad(fechaNacimiento) {
   if (!fechaNacimiento) return 0;
@@ -21,7 +21,12 @@ export default function RangoEtareo() {
 
   useEffect(() => {
     axios.get(API_URL).then(res => {
-      const empleados = res.data;
+      const empleados = (Array.isArray(res.data) ? res.data : []).map(it => ({
+        sucursal: it.sucursalNombre || 'Sin sucursal',
+        sexo: it.sexo || null,
+        fecha_nacimiento: it.fecha_nacimiento || null,
+        discapacidad: it.discapacidad || null,
+      }));
       // Agrupa por sucursal
       const sucursales = {};
       empleados.forEach(e => {

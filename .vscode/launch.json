@@ -1,4 +1,28 @@
 {
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run microservice-employee (cloudsql)",
+      "request": "launch",
+      "mainClass": "com.microservice_employee.MicroserviceEmployeeApplication",
+      "projectName": "microservice-employee",
+      "cwd": "${workspaceFolder}/Backend/microservice-employee",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "cloudsql",
+        "DB_USERNAME": "grh-bdduser",
+        "DB_PASSWORD": "c_}2ysUR\"6dXEk]o",
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "5433",
+        "DB_NAME": "grh",
+        "SPRING_FLYWAY_ENABLED": "false"
+      },
+      "args": ["--spring.profiles.active=cloudsql"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
+{
     "configurations": [
         {
             "type": "java",
