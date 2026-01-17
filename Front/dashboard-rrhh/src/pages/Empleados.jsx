@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx';
 import "../styles/employees.css";
 
 
-const API_URL = 'http://localhost:8082/api/empleados';
+const API_URL = 'http://localhost:8082/api/db/empleados';
 const API_CONTRATOS_ACTIVOS_URL = 'http://localhost:8082/api/db/contratos/activos';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -14,6 +14,8 @@ export default function Empleados() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [vacacionesVigentes, setVacacionesVigentes] = useState({});
+  const [licenciasVigentes, setLicenciasVigentes] = useState({});
   const [form, setForm] = useState({
     name: '',
     lastname: '',
@@ -81,6 +83,8 @@ export default function Empleados() {
           fechaIngreso: item.fechaContratacion,
         }));
         setEmployees(mapped);
+        // Cargar vacaciones y licencias vigentes
+        fetchVacacionesYLicenciasVigentes(mapped);
       } else {
         setEmployees([]);
       }
@@ -89,6 +93,56 @@ export default function Empleados() {
       setEmployees([]);
     }
     setLoading(false);
+  };
+
+  const fetchVacacionesYLicenciasVigentes = async (empleadosList) => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    const vacacionesMap = {};
+    const licenciasMap = {};
+    
+    // Procesar en lotes para no sobrecargar
+    for (const emp of empleadosList) {
+      try {
+        // Obtener vacaciones del empleado
+        const vacRes = await axios.get(`${API_URL}/${emp.id}/vacaciones`);
+        if (Array.isArray(vacRes.data)) {
+          // Filtrar las vigentes (fecha actual está entre desde y hasta)
+          const vigente = vacRes.data.find(v => {
+            const desde = new Date(v.desde);
+            const hasta = new Date(v.hasta || v.retorno);
+            desde.setHours(0, 0, 0, 0);
+            hasta.setHours(0, 0, 0, 0);
+            return hoy >= desde && hoy <= hasta;
+          });
+          if (vigente) {
+            vacacionesMap[emp.id] = vigente;
+          }
+        }
+        
+        // Obtener licencias del empleado
+        const licRes = await axios.get(`${API_URL}/${emp.id}/licencias`);
+        if (Array.isArray(licRes.data)) {
+          // Filtrar las vigentes
+          const vigente = licRes.data.find(l => {
+            const desde = new Date(l.desde);
+            const hasta = new Date(l.hasta);
+            desde.setHours(0, 0, 0, 0);
+            hasta.setHours(0, 0, 0, 0);
+            return hoy >= desde && hoy <= hasta;
+          });
+          if (vigente) {
+            licenciasMap[emp.id] = vigente;
+          }
+        }
+      } catch (err) {
+        console.warn(`Error obteniendo vacaciones/licencias para empleado ${emp.id}:`, err);
+      }
+    }
+    
+    setVacacionesVigentes(vacacionesMap);
+    setLicenciasVigentes(licenciasMap);
   };
 
   useEffect(() => {
@@ -150,7 +204,7 @@ export default function Empleados() {
     setModalTipo('vacaciones');
     try {
       const res = await axios.get(`${API_URL}/${empleadoId}/vacaciones`);
-      setModalItems(res.data ? [res.data] : []);
+      setModalItems(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error obteniendo vacaciones:', err);
       setModalItems([]);
@@ -374,18 +428,30 @@ export default function Empleados() {
                       <td>{emp.fechaIngreso || ''}</td>
                       <td>
                         <button
-                          className="btn btn-sm btn-outline-primary"
+                          className={`btn btn-sm ${vacacionesVigentes[emp.id] ? 'btn-primary' : 'btn-outline-primary'}`}
                           onClick={() => handleShowVacaciones(emp.id)}
                         >
-                          Ver Vacaciones
+                          {vacacionesVigentes[emp.id] ? (
+                            <>
+                              <strong>En Vacaciones</strong>
+                              <br />
+                              <small>{new Date(vacacionesVigentes[emp.id].desde).toLocaleDateString('es-CL')} - {new Date(vacacionesVigentes[emp.id].hasta || vacacionesVigentes[emp.id].retorno).toLocaleDateString('es-CL')}</small>
+                            </>
+                          ) : 'Ver Vacaciones'}
                         </button>
                       </td>
                       <td>
                         <button
-                          className="btn btn-sm btn-outline-success"
+                          className={`btn btn-sm ${licenciasVigentes[emp.id] ? 'btn-success' : 'btn-outline-success'}`}
                           onClick={() => handleShowLicencias(emp.id)}
                         >
-                          Ver Licencias
+                          {licenciasVigentes[emp.id] ? (
+                            <>
+                              <strong>Con Licencia</strong>
+                              <br />
+                              <small>{new Date(licenciasVigentes[emp.id].desde).toLocaleDateString('es-CL')} - {new Date(licenciasVigentes[emp.id].hasta).toLocaleDateString('es-CL')}</small>
+                            </>
+                          ) : 'Ver Licencias'}
                         </button>
                       </td>
                       <td>

@@ -7,6 +7,15 @@ export default function ReporteDiscapacidad() {
   const [data, setData] = useState([]);
   const [busqueda, setBusqueda] = useState('');
 
+  // Helper function para determinar si tiene discapacidad
+  // Funciona tanto con boolean (actual) como con string (después de migración)
+  const tieneDiscapacidad = (discapacidad) => {
+    if (discapacidad === null || discapacidad === undefined) return false;
+    if (typeof discapacidad === 'boolean') return discapacidad;
+    if (typeof discapacidad === 'string') return discapacidad.trim().length > 0;
+    return false;
+  };
+
   useEffect(() => {
     axios.get(API_URL).then(res => {
       const empleados = (Array.isArray(res.data) ? res.data : []).map(it => ({
@@ -22,7 +31,7 @@ export default function ReporteDiscapacidad() {
         if (!sucursales[key]) {
           sucursales[key] = { si: 0, no: 0, total: 0 };
         }
-        if (e.discapacidad) {
+        if (tieneDiscapacidad(e.discapacidad)) {
           sucursales[key].si++;
         } else {
           sucursales[key].no++;

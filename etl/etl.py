@@ -162,6 +162,24 @@ def process_contract(rec: Dict[str, Any]) -> Dict[str, Any]:
     empleado_id = int(rec.get("empleado") or 0)
     empleado_details = rec.get("empleadoDetails") or {}
     
+    # Handle discapacidad field - Talana stores it in detalles[0].discapacidades
+    # Extract from the first detalles object if available
+    discapacidad_value = None
+    detalles_list = empleado_details.get("detalles", [])
+    if detalles_list and len(detalles_list) > 0:
+        discapacidades_raw = detalles_list[0].get("discapacidades")
+        if discapacidades_raw:
+            # Convert to string if not already, handle various formats
+            if isinstance(discapacidades_raw, bool):
+                discapacidad_value = "Discapacidad registrada" if discapacidades_raw else None
+            elif isinstance(discapacidades_raw, str):
+                discapacidad_value = discapacidades_raw.strip() or None
+            elif isinstance(discapacidades_raw, list) and len(discapacidades_raw) > 0:
+                # If it's a list, join the values
+                discapacidad_value = ", ".join(str(d) for d in discapacidades_raw if d)
+            else:
+                discapacidad_value = str(discapacidades_raw).strip() or None
+    
     empleado = {
         "id": empleado_id,
         "rut": empleado_details.get("rut"),
@@ -170,7 +188,7 @@ def process_contract(rec: Dict[str, Any]) -> Dict[str, Any]:
         "ap_materno": empleado_details.get("apellidoMaterno"),
         "sexo": empleado_details.get("sexo"),  # May not be present
         "fecha_nac": empleado_details.get("fechaNacimiento"),  # May not be present
-        "discapacidad": empleado_details.get("discapacidad", False),
+        "discapacidad": discapacidad_value,
     }
 
     # Extract centro_costo from nested object

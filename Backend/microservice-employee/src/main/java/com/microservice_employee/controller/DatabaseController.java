@@ -45,17 +45,89 @@ public class DatabaseController {
                 e.id,
                 e.rut,
                 e.nombre,
-                e.apellido_paterno,
-                e.apellido_materno,
+                e.ap_paterno,
+                e.ap_materno,
                 e.sexo,
-                e.fecha_nacimiento,
-                e.nacionalidad,
-                e.email
+                e.fecha_nac,
+                e.discapacidad
             FROM empleado e
-            ORDER BY e.nombre, e.apellido_paterno
+            ORDER BY e.nombre, e.ap_paterno
             LIMIT ? OFFSET ?
             """;
         return jdbcTemplate.queryForList(sql, size, offset);
+    }
+
+    /**
+     * GET /api/db/empleados/{empleadoId}/detalle
+     * Devuelve detalle laboral del empleado a partir del último contrato vigente.
+     */
+    @GetMapping("/empleados/{empleadoId}/detalle")
+    public Map<String, Object> getEmpleadoDetalle(@PathVariable int empleadoId) {
+        String sql = """
+            SELECT DISTINCT ON (c.empleado_id)
+                COALESCE(c.cargo, '')              AS cargo,
+                cc.codigo                          AS centroCostoCodigo,
+                cc.nombre                          AS centroCostoNombre,
+                COALESCE(s.nombre, 'Sin sucursal') AS sucursal,
+                c.fecha_contratacion               AS fechaIngreso,
+                ''                                 AS jefe
+            FROM contrato c
+            LEFT JOIN centro_costo cc ON c.centro_costo_id = cc.id
+            LEFT JOIN sucursal s ON c.sucursal_id = s.id
+            WHERE c.empleado_id = ? 
+              AND c.vigente = true
+            ORDER BY c.empleado_id, c.fecha_contratacion DESC NULLS LAST
+            """;
+        try {
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, empleadoId);
+            return list.isEmpty() ? Map.of() : list.get(0);
+        } catch (Exception ex) {
+            return Map.of();
+        }
+    }
+
+    /**
+     * GET /api/db/empleados/{empleadoId}/vacaciones
+     */
+    @GetMapping("/empleados/{empleadoId}/vacaciones")
+    public List<Map<String, Object>> getVacacionesPorEmpleado(@PathVariable int empleadoId) {
+        String sql = """
+            SELECT 
+                v.id,
+                v.empleado_id,
+                v.desde,
+                v.hasta,
+                v.retorno,
+                v.dias,
+                v.medios_dias,
+                v.fecha_aprobacion,
+                v.tipo
+            FROM vacaciones v
+            WHERE v.empleado_id = ?
+            ORDER BY v.desde DESC
+            """;
+        return jdbcTemplate.queryForList(sql, empleadoId);
+    }
+
+    /**
+     * GET /api/db/empleados/{empleadoId}/licencias
+     */
+    @GetMapping("/empleados/{empleadoId}/licencias")
+    public List<Map<String, Object>> getLicenciasPorEmpleado(@PathVariable int empleadoId) {
+        String sql = """
+            SELECT 
+                l.id,
+                l.empleado_id,
+                l.desde,
+                l.hasta,
+                l.dias,
+                l.tipo,
+                l.fecha_solicitud
+            FROM licencias l
+            WHERE l.empleado_id = ?
+            ORDER BY l.desde DESC
+            """;
+        return jdbcTemplate.queryForList(sql, empleadoId);
     }
 
     /**
@@ -67,20 +139,15 @@ public class DatabaseController {
         String sql = """
             SELECT DISTINCT ON (c.empleado_id)
                 c.empleado_id,
-                COALESCE(s.nombre, 'Sin sucursal') AS sucursalNombre,
+                COALESCE(s.nombre, 'Sin sucursal') AS "sucursalNombre",
                 COALESCE(c.cargo, '') AS cargo,
                 e.sexo,
-                e.fecha_nacimiento
+                e.fecha_nac AS fecha_nacimiento,
+                e.discapacidad
             FROM contrato c
             INNER JOIN empleado e ON c.empleado_id = e.id
             LEFT JOIN sucursal s ON c.sucursal_id = s.id
-            WHERE (
-                c.activo = true
-            ) OR (
-                (c.finiquitado IS NULL OR c.finiquitado = false)
-                AND (c.hasta IS NULL OR c.hasta::date >= CURRENT_DATE)
-                AND (c.desde IS NULL OR c.desde::date <= CURRENT_DATE)
-            )
+            WHERE c.vigente = true
             ORDER BY c.empleado_id, c.fecha_contratacion DESC NULLS LAST
             """;
         try {
@@ -105,26 +172,22 @@ public class DatabaseController {
             SELECT 
                 c.id,
                 c.empleado_id,
-                e.nombre || ' ' || e.apellido_paterno || ' ' || COALESCE(e.apellido_materno, '') as empleado_nombre,
+                e.nombre || ' ' || e.ap_paterno || ' ' || COALESCE(e.ap_materno, '') as empleado_nombre,
                 e.rut as empleado_rut,
-                c.tipo_contrato,
-                tc.nombre as tipo_contrato_nombre,
                 c.fecha_contratacion,
                 c.desde,
                 c.hasta,
-                c.finiquitado,
                 c.cargo,
-                c.sueldo_base,
+                c.cargo_norm,
                 cc.nombre as centro_costo_nombre,
                 s.nombre as sucursal_nombre,
-                c.activo
+                c.vigente
             FROM contrato c
             INNER JOIN empleado e ON c.empleado_id = e.id
-            LEFT JOIN tipo_contrato tc ON c.tipo_contrato = tc.id
             LEFT JOIN centro_costo cc ON c.centro_costo_id = cc.id
             LEFT JOIN sucursal s ON c.sucursal_id = s.id
             WHERE 1=1
-            """ + (activo != null ? " AND c.activo = ?" : "") + """
+            """ + (activo != null ? " AND c.vigente = ?" : "") + """
             ORDER BY c.fecha_contratacion DESC, e.nombre
             LIMIT ? OFFSET ?
             """;
@@ -147,7 +210,7 @@ public class DatabaseController {
                 c.empleado_id              AS "empleadoId",
                 e.rut                      AS "rut",
                 e.nombre                   AS "nombre",
-                e.apellido_paterno         AS "apellidoPaterno",
+                e.ap_paterno               AS "apellidoPaterno",
                 COALESCE(c.cargo, '')      AS "cargo",
                 cc.codigo                  AS "centroCostoCodigo",
                 cc.nombre                  AS "centroCostoNombre",
@@ -158,13 +221,7 @@ public class DatabaseController {
             INNER JOIN empleado e ON c.empleado_id = e.id
             LEFT JOIN centro_costo cc ON c.centro_costo_id = cc.id
             LEFT JOIN sucursal s ON c.sucursal_id = s.id
-            WHERE (
-                c.activo = true
-            ) OR (
-                (c.finiquitado IS NULL OR c.finiquitado = false)
-                AND (c.hasta IS NULL OR c.hasta::date >= CURRENT_DATE)
-                AND (c.desde IS NULL OR c.desde::date <= CURRENT_DATE)
-            )
+            WHERE c.vigente = true
             ORDER BY c.empleado_id, c.fecha_contratacion DESC NULLS LAST
             """;
         try {
@@ -181,7 +238,7 @@ public class DatabaseController {
     @GetMapping("/contratos/count")
     public Map<String, Object> getContratosCount(@RequestParam(required = false) Boolean activo) {
         String sql = "SELECT COUNT(*) as total FROM contrato WHERE 1=1" + 
-                     (activo != null ? " AND activo = ?" : "");
+                     (activo != null ? " AND vigente = ?" : "");
         
         Long count;
         if (activo != null) {
@@ -233,7 +290,7 @@ public class DatabaseController {
             SELECT 
                 v.id,
                 v.empleado_id,
-                e.nombre || ' ' || e.apellido_paterno as empleado_nombre,
+                e.nombre || ' ' || e.ap_paterno as empleado_nombre,
                 e.rut as empleado_rut,
                 v.desde,
                 v.hasta,
@@ -262,7 +319,7 @@ public class DatabaseController {
             SELECT 
                 v.id,
                 v.empleado_id,
-                e.nombre || ' ' || e.apellido_paterno as empleado_nombre,
+                e.nombre || ' ' || e.ap_paterno as empleado_nombre,
                 e.rut as empleado_rut,
                 v.desde,
                 v.hasta,
@@ -281,23 +338,33 @@ public class DatabaseController {
 
     /**
      * GET /api/db/metrics/vacaciones/daily
-     * Serie diaria de vacaciones desde N días atrás hasta hoy.
+     * Serie diaria de vacaciones activas desde ayer hasta los próximos N días.
+     * Cuenta todas las vacaciones que estén vigentes en cada fecha (no solo las que inician ese día).
      */
     @GetMapping("/metrics/vacaciones/daily")
     public List<Map<String, Object>> getVacacionesDaily(
             @RequestParam(defaultValue = "14") int days
     ) {
-        LocalDate start = LocalDate.now().minusDays(Math.max(0, days - 1));
+        LocalDate ayer = LocalDate.now().minusDays(1);
+        LocalDate fin = ayer.plusDays(days);
         String sql = """
+            WITH RECURSIVE fechas AS (
+                SELECT ?::date AS fecha
+                UNION ALL
+                SELECT fecha + 1
+                FROM fechas
+                WHERE fecha < ?::date
+            )
             SELECT 
-                v.desde::date AS fecha,
-                COUNT(*) AS total
-            FROM vacaciones v
-            WHERE v.desde::date >= ?
-            GROUP BY v.desde::date
-            ORDER BY fecha
+                f.fecha,
+                COUNT(v.id) AS total
+            FROM fechas f
+            LEFT JOIN vacaciones v ON f.fecha >= v.desde::date 
+                                   AND f.fecha <= COALESCE(v.hasta::date, v.retorno::date)
+            GROUP BY f.fecha
+            ORDER BY f.fecha
             """;
-        return jdbcTemplate.queryForList(sql, Date.valueOf(start));
+        return jdbcTemplate.queryForList(sql, Date.valueOf(ayer), Date.valueOf(fin));
     }
 
     /**
@@ -310,7 +377,7 @@ public class DatabaseController {
             SELECT 
                 l.id,
                 l.empleado_id,
-                e.nombre || ' ' || e.apellido_paterno as empleado_nombre,
+                e.nombre || ' ' || e.ap_paterno as empleado_nombre,
                 e.rut as empleado_rut,
                 l.desde,
                 l.hasta,
@@ -337,7 +404,7 @@ public class DatabaseController {
             SELECT 
                 l.id,
                 l.empleado_id,
-                e.nombre || ' ' || e.apellido_paterno as empleado_nombre,
+                e.nombre || ' ' || e.ap_paterno as empleado_nombre,
                 e.rut as empleado_rut,
                 l.desde,
                 l.hasta,
@@ -354,23 +421,33 @@ public class DatabaseController {
 
     /**
      * GET /api/db/metrics/licencias/daily
-     * Serie diaria de licencias desde N días atrás hasta hoy.
+     * Serie diaria de licencias activas desde ayer hasta los próximos N días.
+     * Cuenta todas las licencias que estén vigentes en cada fecha (no solo las que inician ese día).
      */
     @GetMapping("/metrics/licencias/daily")
     public List<Map<String, Object>> getLicenciasDaily(
             @RequestParam(defaultValue = "14") int days
     ) {
-        LocalDate start = LocalDate.now().minusDays(Math.max(0, days - 1));
+        LocalDate ayer = LocalDate.now().minusDays(1);
+        LocalDate fin = ayer.plusDays(days);
         String sql = """
+            WITH RECURSIVE fechas AS (
+                SELECT ?::date AS fecha
+                UNION ALL
+                SELECT fecha + 1
+                FROM fechas
+                WHERE fecha < ?::date
+            )
             SELECT 
-                l.desde::date AS fecha,
-                COUNT(*) AS total
-            FROM licencias l
-            WHERE l.desde::date >= ?
-            GROUP BY l.desde::date
-            ORDER BY fecha
+                f.fecha,
+                COUNT(l.id) AS total
+            FROM fechas f
+            LEFT JOIN licencias l ON f.fecha >= l.desde::date 
+                                  AND f.fecha <= l.hasta::date
+            GROUP BY f.fecha
+            ORDER BY f.fecha
             """;
-        return jdbcTemplate.queryForList(sql, Date.valueOf(start));
+        return jdbcTemplate.queryForList(sql, Date.valueOf(ayer), Date.valueOf(fin));
     }
 
     /**
@@ -381,7 +458,7 @@ public class DatabaseController {
     public Map<String, Object> getStats() {
         Long totalEmpleados = safeCount("SELECT COUNT(*) FROM empleado");
         Long totalContratos = safeCount("SELECT COUNT(*) FROM contrato");
-        Long contratosActivos = safeCount("SELECT COUNT(*) FROM contrato WHERE activo = true");
+        Long contratosActivos = safeCount("SELECT COUNT(*) FROM contrato WHERE vigente = true");
         Long totalVacaciones = safeCount("SELECT COUNT(*) FROM vacaciones");
         Long totalLicencias = safeCount("SELECT COUNT(*) FROM licencias");
 
