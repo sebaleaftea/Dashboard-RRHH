@@ -37,18 +37,16 @@ if [ ! -d "Backend/microservice-user" ]; then
     echo "   cd Dashboard-RRHH"
     exit 1
 fi
-
-cd Backend/microservice-user
 echo "   OK - Directorio encontrado"
 
 # Verificar archivos necesarios
 echo ""
 echo "3. Verificando archivos necesarios..."
-if [ ! -f "Dockerfile" ]; then
+if [ ! -f "Backend/microservice-user/Dockerfile" ]; then
     echo "   ERROR: Dockerfile no encontrado"
     exit 1
 fi
-if [ ! -f "pom.xml" ]; then
+if [ ! -f "Backend/microservice-user/pom.xml" ]; then
     echo "   ERROR: pom.xml no encontrado"
     exit 1
 fi
@@ -58,6 +56,7 @@ echo "   OK - Archivos encontrados"
 echo ""
 echo "4. Compilando con Maven..."
 echo "   (Esto puede tomar varios minutos...)"
+cd Backend/microservice-user
 ./mvnw clean package -DskipTests
 if [ $? -ne 0 ]; then
     echo "   ERROR: Compilación falló"
