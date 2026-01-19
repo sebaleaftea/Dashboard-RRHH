@@ -117,10 +117,10 @@ export default function Home() {
           <div className="p-3 border rounded bg-light">
             <h5>Cargos clave (mapeados)</h5>
             <div className="d-flex flex-column gap-1">
-              <span>Vendedor 16: <strong>{totalVendedor16}</strong></span>
-              <span>Vendedor 24: <strong>{totalVendedor24}</strong></span>
-              <span>Vendedor: <strong>{totalVendedor}</strong></span>
-              <span>Subgerente de tienda: <strong>{totalSubgerente}</strong></span>
+              <span>Vendedor PT 16: <strong>{totalVendedor16}</strong></span>
+              <span>Vendedor PT 24: <strong>{totalVendedor24}</strong></span>
+              <span>Vendedor Full: <strong>{totalVendedor}</strong></span>
+              <span>Administrador de tienda Jr <strong>{totalSubgerente}</strong></span>
             </div>
           </div>
         </div>
@@ -128,22 +128,8 @@ export default function Home() {
       {stats && (
         <div className="row g-4 mb-4">
           <div className="col-md-4">
-            <div className="p-3 border rounded bg-light">
-              <h5>Vacaciones hoy</h5>
-              <p className="h2">{stats.vacacionesHoy}</p>
-            </div>
           </div>
           <div className="col-md-4">
-            <div className="p-3 border rounded bg-light">
-              <h5>Licencias hoy</h5>
-              <p className="h2">{stats.licenciasHoy}</p>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="p-3 border rounded bg-light">
-              <h5>Contratos activos</h5>
-              <p className="h2">{stats.contratosActivos}</p>
-            </div>
           </div>
         </div>
       )}

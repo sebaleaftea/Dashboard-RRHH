@@ -47,7 +47,7 @@ export function Sidebar({ isOpen, onClose }) {
         aria-label="Sidebar"
       >
         <div className="d-flex align-items-center justify-content-between px-3 py-3 border-bottom sidebar-header">
-          <span className="fw-semibold">Panel RRHH</span>
+          <span className="fw-semibold">Panel GDH</span>
           <button className="btn btn-light d-lg-none" onClick={onClose} aria-label="Cerrar menú">
             <i className="bi bi-x-lg"></i>
           </button>

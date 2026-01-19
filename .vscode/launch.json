@@ -3,7 +3,7 @@
   "configurations": [
     {
       "type": "java",
-      "name": "Run microservice-employee (cloudsql)",
+      "name": "Run: MicroserviceEmployeeApplication",
       "request": "launch",
       "mainClass": "com.microservice_employee.MicroserviceEmployeeApplication",
       "projectName": "microservice-employee",
@@ -19,61 +19,54 @@
       },
       "args": ["--spring.profiles.active=cloudsql"],
       "console": "integratedTerminal"
+    },
+    {
+      "type": "java",
+      "name": "Run: MicroserviceUserApplication",
+      "request": "launch",
+      "mainClass": "com.microservice_user.MicroserviceUserApplication",
+      "projectName": "microservice-user",
+      "cwd": "${workspaceFolder}/Backend/microservice-user",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "cloudsql",
+        "DB_USERNAME": "grh-bdduser",
+        "DB_PASSWORD": "c_}2ysUR\"6dXEk]o",
+        "DB_HOST": "localhost",
+        "DB_PORT": "5433",
+        "DB_NAME": "grh"
+      },
+      "args": ["--spring.profiles.active=cloudsql"],
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "java",
+      "name": "Run: MicroserviceConfigApplication",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.microservice.config.MicroserviceConfigApplication",
+      "projectName": "microservice-config",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Run: MicroserviceEurekaApplication",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.microservice.eureka.MicroserviceEurekaApplication",
+      "projectName": "microservice-eureka",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Run: MicroserviceGatewayApplication",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.microservice.gateway.microservice_gateway.MicroserviceGatewayApplication",
+      "projectName": "microservice-gateway",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
-}
-{
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Spring Boot-MicroserviceConfigApplication<microservice-config>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.microservice.config.MicroserviceConfigApplication",
-            "projectName": "microservice-config",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env",
-            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=49303 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=microservice-config"
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-MicroserviceEurekaApplication<microservice-eureka>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.microservice.eureka.MicroserviceEurekaApplication",
-            "projectName": "microservice-eureka",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-MicroserviceGatewayApplication<microservice-gateway>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.microservice.gateway.microservice_gateway.MicroserviceGatewayApplication",
-            "projectName": "microservice-gateway",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-MicroserviceUserApplication<microservice-user>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.microservice_user.MicroserviceUserApplication",
-            "projectName": "microservice-user",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-MicroserviceEmployeeApplication<microservice-employee>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.microservice_employee.MicroserviceEmployeeApplication",
-            "projectName": "microservice-employee",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
-        }
-    ]
 }

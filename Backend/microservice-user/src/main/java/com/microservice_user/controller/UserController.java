@@ -28,17 +28,16 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        // CORRECCIÓN: Usamos findByName y getName() en lugar de email
-        // Asegúrate de que tu UserService tenga el método findByName implementado
-        User foundUser = userService.findByName(user.getName());
+        // Buscar por username y validar password
+        User foundUser = userService.login(user.getUsername(), user.getPassword());
         
-        if (foundUser != null && foundUser.getPasswordHash().equals(user.getPasswordHash())) {
+        if (foundUser != null) {
             return ResponseEntity.ok(foundUser);
         }
-        return ResponseEntity.status(401).body("Credenciales inválidas");
+        return ResponseEntity.status(401).body("Credenciales inválidas o usuario inactivo");
     }
 
-        @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         try {
             userService.deleteUser(id);
