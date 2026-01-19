@@ -11,7 +11,7 @@ export const API_URLS = {
   // Microservice Employee (empleados)
   EMPLOYEE_SERVICE: isDevelopment 
     ? 'http://localhost:8082'
-    : 'http://localhost:8082', // Cambiar cuando se despliegue
+    : 'https://microservice-employee-7jrwjdnsoq-tl.a.run.app',
 };
 
 // Endpoints específicos
