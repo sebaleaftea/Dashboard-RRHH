@@ -3,8 +3,12 @@ import axios from 'axios';
 import GraficoRangoEtareo from '../components/GraficoRangoEtareo';
 import GraficoGenero from '../components/GraficoGenero';
 import GraficoDiscapacidad from '../components/GraficoDiscapacidad';
+import GraficoSerieDiaria from '../components/GraficoSerieDiaria';
+import { normalizarCargo } from '../utils/cargos';
 
-const API_URL = 'http://localhost:8082/api/v1/employees/all';
+// Usaremos contratos activos como fuente única de verdad
+const API_URL = 'http://localhost:8082/api/db/empleados/activos';
+const DB_BASE = 'http://localhost:8082/api/db';
 
 function calcularEdad(fechaNacimiento) {
   if (!fechaNacimiento) return 0;
@@ -20,9 +24,29 @@ function calcularEdad(fechaNacimiento) {
 
 export default function Home() {
   const [empleados, setEmpleados] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [serieVacaciones, setSerieVacaciones] = useState([]);
+  const [serieLicencias, setSerieLicencias] = useState([]);
 
   useEffect(() => {
-    axios.get(API_URL).then(res => setEmpleados(res.data));
+    // Contratos activos para dotación y cargos
+    axios.get(API_URL).then(res => {
+      const items = Array.isArray(res.data) ? res.data : [];
+      const empleadosActivos = items.map(it => ({
+        sucursal: it.sucursalNombre || 'Sin sucursal',
+        cargo: normalizarCargo(it.cargo),
+        sexo: it.sexo || null,
+        fecha_nacimiento: it.fecha_nacimiento || null,
+        discapacidad: it.discapacidad || null,
+      }));
+      setEmpleados(empleadosActivos);
+    });
+
+    // Stats generales (incluye métricas de hoy)
+    axios.get(`${DB_BASE}/stats`).then(res => setStats(res.data));
+    // Series diarias para gráficos
+    axios.get(`${DB_BASE}/metrics/vacaciones/daily?days=14`).then(res => setSerieVacaciones(res.data));
+    axios.get(`${DB_BASE}/metrics/licencias/daily?days=14`).then(res => setSerieLicencias(res.data));
   }, []);
 
   // Rango etario
@@ -43,6 +67,7 @@ export default function Home() {
 
   // Dotación género por tienda
   const sucursales = [...new Set(empleados.map(e => e.sucursal))];
+  // Si no tenemos sexo, mostramos 0/0 para evitar errores en el gráfico
   const dataGenero = sucursales.map(suc => {
     const empleadosSucursal = empleados.filter(e => e.sucursal === suc);
     const hombres = empleadosSucursal.filter(e => e.sexo === 'M').length;
@@ -66,6 +91,12 @@ export default function Home() {
     { label: 'Sin discapacidad', cantidad: sinDiscapacidad },
   ];
 
+  // Resumen de cargos clave (vendedores y subgerentes), usando cargos mapeados
+  const totalVendedor16 = empleados.filter(e => e.cargo === 'Operador de tienda 16').length;
+  const totalVendedor24 = empleados.filter(e => e.cargo === 'Operador de tienda 24').length;
+  const totalVendedor = empleados.filter(e => e.cargo === 'Operador de tienda').length;
+  const totalSubgerente = empleados.filter(e => e.cargo === 'Administrador de tienda Jr').length;
+
   return (
     <div className="container mt-4">
       <h2 className="mb-4">Dashboard Principal</h2>
@@ -84,12 +115,24 @@ export default function Home() {
         </div>
         <div className="col-md-4">
           <div className="p-3 border rounded bg-light">
-            <h5>Item que podemos agregar...por verse</h5>
-            {/*  */}
-            <p className="h2"></p>
+            <h5>Cargos clave (mapeados)</h5>
+            <div className="d-flex flex-column gap-1">
+              <span>Vendedor PT 16: <strong>{totalVendedor16}</strong></span>
+              <span>Vendedor PT 24: <strong>{totalVendedor24}</strong></span>
+              <span>Vendedor Full: <strong>{totalVendedor}</strong></span>
+              <span>Administrador de tienda Jr <strong>{totalSubgerente}</strong></span>
+            </div>
           </div>
         </div>
       </div>
+      {stats && (
+        <div className="row g-4 mb-4">
+          <div className="col-md-4">
+          </div>
+          <div className="col-md-4">
+          </div>
+        </div>
+      )}
       <div className="row g-4">
         <div className="col-md-4">
           <div className="p-3 border rounded bg-white">
@@ -104,6 +147,18 @@ export default function Home() {
         <div className="col-md-4">
           <div className="p-3 border rounded bg-white">
             <GraficoDiscapacidad data={dataDiscapacidad} />
+          </div>
+        </div>
+      </div>
+      <div className="row g-4 mt-4">
+        <div className="col-md-6">
+          <div className="p-3 border rounded bg-white">
+            <GraficoSerieDiaria title="Vacaciones (últimos 14 días)" data={serieVacaciones} color="#5ab67dff" />
+          </div>
+        </div>
+        <div className="col-md-6">
+          <div className="p-3 border rounded bg-white">
+            <GraficoSerieDiaria title="Licencias (últimos 14 días)" data={serieLicencias} color="#e38b00" />
           </div>
         </div>
       </div>

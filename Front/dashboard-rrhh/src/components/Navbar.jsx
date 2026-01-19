@@ -13,7 +13,7 @@ export default function NavBar({ onMenuClick }) {
           <i className="bi bi-list" /> Menu
         </button>
 
-        <Navbar.Brand href="">Tiendas Mass Chile</Navbar.Brand>
+        <Navbar.Brand href="#">Tiendas Mass Chile</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
         </Navbar.Collapse>

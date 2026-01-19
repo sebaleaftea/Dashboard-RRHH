@@ -21,6 +21,7 @@
     <java.version>17</java.version>
     <spring-cloud.version>2024.0.2</spring-cloud.version>
     <maven.test.skip>true</maven.test.skip>
+    <flyway.version>10.20.1</flyway.version>
   </properties>
 
   <dependencyManagement>
@@ -42,15 +43,38 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-    <!-- JPA / MySQL -->
+    <!-- OkHttp para consumo de API externa -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>4.12.0</version>
+    </dependency>
+
+    <!-- JSON Processing (explícito) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-json</artifactId>
+    </dependency>
+
+    <!-- JPA + Postgres + Flyway (para persistencia y migraciones) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.mysql</groupId>
-      <artifactId>mysql-connector-j</artifactId>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+      <version>${flyway.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+      <version>${flyway.version}</version>
     </dependency>
 
     <!-- Validation -->
@@ -69,6 +93,14 @@
       <artifactId>spring-cloud-starter-openfeign</artifactId>
     </dependency>
 
+    <!-- DevTools para desarrollo -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+
     <!-- Test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -83,12 +115,13 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Lombok -->
-	<dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <optional>true</optional>
-    </dependency>
+      <!-- Lombok -->
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.32</version>
+        <scope>provided</scope>
+      </dependency>
 
   </dependencies>
 
@@ -98,7 +131,8 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
-          <mainClass>com.microservice_user.MicroserviceUserApplication</mainClass>
+          <!-- Corregir la clase principal para que coincida con tu proyecto -->
+          <mainClass>com.microservice_employee.MicroserviceEmployeeApplication</mainClass>
         </configuration>
       </plugin>
     </plugins>

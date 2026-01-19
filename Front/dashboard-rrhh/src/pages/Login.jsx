@@ -5,8 +5,7 @@ import logo from '../assets/logo.png';
 
 export default function Login() {
   const navigate = useNavigate();
-  // Cambiamos el estado de email a name
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -20,10 +19,9 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        // Enviamos 'name' en lugar de 'email'
         body: JSON.stringify({ 
-          name: name, 
-          passwordHash: password 
+          username: username, 
+          password: password 
         }),
       });
 
@@ -51,15 +49,14 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            {/* Cambiamos la etiqueta y el input */}
             <label htmlFor="username">Usuario</label>
             <input
               id="username"
-              type="text" // Tipo texto, no email
+              type="text"
               className="form-control"
-              placeholder="Ej: Pedrito23"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Ej: admin"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>

@@ -1,0 +1,39 @@
+﻿--- java listeners ---
+
+LocalAddress LocalPort OwningProcess
+------------ --------- -------------
+::                8080         30680
+::                8081         31664
+::                8082         28204
+::                8761         26372
+::                8888         25764
+::               35729         28204
+::               49303         25764
+::               49675         26372
+::               49676         26372
+::               49702         31664
+::               49703         31664
+::               49726         30680
+::               49727         30680
+::               53404         30680
+::               54825         25764
+::               54826         25764
+::               55654         31664
+::               57969         28204
+::               57970         28204
+::               60717         34656
+::               60732         26372
+::               60760         28204
+
+
+
+--- health probes ---
+ERR 404 http://localhost:8082/actuator/health :: Error en el servidor remoto: (404) No se encontró.
+OK 200 http://localhost:8080/actuator/health
+ERR 404 http://localhost:8081/actuator/health :: Error en el servidor remoto: (404) No se encontró.
+ERR  http://localhost:8083/actuator/health :: No es posible conectar con el servidor remoto
+--- employee probes on 8082 ---
+OK 200 http://localhost:8082/api/empleados/basicos?limit=5&offset=0
+ERR 404 http://localhost:8082/api/empleados/1090131/detalle :: Error en el servidor remoto: (404) No se encontró.
+ERR 404 http://localhost:8082/api/empleados/1090131/contrato :: Error en el servidor remoto: (404) No se encontró.
+ERR 404 http://localhost:8082/api/empleados/rut/12832270-1/contrato :: Error en el servidor remoto: (404) No se encontró.

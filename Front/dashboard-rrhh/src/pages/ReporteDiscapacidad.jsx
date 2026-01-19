@@ -1,15 +1,29 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8082/api/v1/employees/all';
+const API_URL = 'http://localhost:8082/api/db/empleados/activos';
 
 export default function ReporteDiscapacidad() {
   const [data, setData] = useState([]);
   const [busqueda, setBusqueda] = useState('');
 
+  // Helper function para determinar si tiene discapacidad
+  // Funciona tanto con boolean (actual) como con string (después de migración)
+  const tieneDiscapacidad = (discapacidad) => {
+    if (discapacidad === null || discapacidad === undefined) return false;
+    if (typeof discapacidad === 'boolean') return discapacidad;
+    if (typeof discapacidad === 'string') return discapacidad.trim().length > 0;
+    return false;
+  };
+
   useEffect(() => {
     axios.get(API_URL).then(res => {
-      const empleados = res.data;
+      const empleados = (Array.isArray(res.data) ? res.data : []).map(it => ({
+        sucursal: it.sucursalNombre || 'Sin sucursal',
+        sexo: it.sexo || null,
+        fecha_nacimiento: it.fecha_nacimiento || null,
+        discapacidad: it.discapacidad || null,
+      }));
       // Agrupa por sucursal
       const sucursales = {};
       empleados.forEach(e => {
@@ -17,7 +31,7 @@ export default function ReporteDiscapacidad() {
         if (!sucursales[key]) {
           sucursales[key] = { si: 0, no: 0, total: 0 };
         }
-        if (e.discapacidad) {
+        if (tieneDiscapacidad(e.discapacidad)) {
           sucursales[key].si++;
         } else {
           sucursales[key].no++;
