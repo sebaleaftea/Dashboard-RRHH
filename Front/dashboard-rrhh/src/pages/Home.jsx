@@ -5,10 +5,11 @@ import GraficoGenero from '../components/GraficoGenero';
 import GraficoDiscapacidad from '../components/GraficoDiscapacidad';
 import GraficoSerieDiaria from '../components/GraficoSerieDiaria';
 import { normalizarCargo } from '../utils/cargos';
+import { API_URLS } from '../config/api';
 
 // Usaremos contratos activos como fuente única de verdad
-const API_URL = 'http://localhost:8082/api/db/empleados/activos';
-const DB_BASE = 'http://localhost:8082/api/db';
+const API_URL = `${API_URLS.EMPLOYEE_SERVICE}/api/db/empleados/activos`;
+const DB_BASE = `${API_URLS.EMPLOYEE_SERVICE}/api/db`;
 
 function calcularEdad(fechaNacimiento) {
   if (!fechaNacimiento) return 0;

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { normalizarCargo } from '../utils/cargos';
+import { API_URLS } from '../config/api';
 
 // Usamos el endpoint normalizado de contratos activos desde la BDD
-const API_URL = 'http://localhost:8082/api/db/contratos/activos';
+const API_URL = `${API_URLS.EMPLOYEE_SERVICE}/api/db/contratos/activos`;
 
 // El mapeo de cargos ahora se comparte en utils/cargos.js
 

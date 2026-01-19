@@ -3,10 +3,11 @@ import axios from 'axios';
 import ModalLista from '../components/ModalLista';
 import * as XLSX from 'xlsx';
 import "../styles/employees.css";
+import { API_URLS } from '../config/api';
 
 
-const API_URL = 'http://localhost:8082/api/db/empleados';
-const API_CONTRATOS_ACTIVOS_URL = 'http://localhost:8082/api/db/contratos/activos';
+const API_URL = `${API_URLS.EMPLOYEE_SERVICE}/api/db/empleados`;
+const API_CONTRATOS_ACTIVOS_URL = `${API_URLS.EMPLOYEE_SERVICE}/api/db/contratos/activos`;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 

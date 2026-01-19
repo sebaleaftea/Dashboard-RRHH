@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_URLS } from '../config/api';
 
-const API_URL = 'http://localhost:8082/api/db/empleados/activos';
+const API_URL = `${API_URLS.EMPLOYEE_SERVICE}/api/db/empleados/activos`;
 
 function calcularEdad(fechaNacimiento) {
   if (!fechaNacimiento) return 0;
