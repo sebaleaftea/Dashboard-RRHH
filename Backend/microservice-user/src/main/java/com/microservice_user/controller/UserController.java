@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "https://*.run.app"}, allowCredentials = "true") 
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "https://dashboard-rrhh-front-1056553941867.southamerica-west1.run.app"}, allowCredentials = "true")
 public class UserController {
 
     @Autowired
