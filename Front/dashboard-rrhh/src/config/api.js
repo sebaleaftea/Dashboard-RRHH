@@ -3,7 +3,7 @@
 // Siempre usar Cloud Run (los servicios ya no están en localhost)
 export const API_URLS = {
   // Microservice User (autenticación)
-  USER_SERVICE: 'https://microservice-user-7jrwjdnsoq-tl.a.run.app',
+  USER_SERVICE: 'https://microservice-user-1056553941867.southamerica-west1.run.app',
   
   // Microservice Employee (empleados)
   EMPLOYEE_SERVICE: 'https://microservice-employee-7jrwjdnsoq-tl.a.run.app',
