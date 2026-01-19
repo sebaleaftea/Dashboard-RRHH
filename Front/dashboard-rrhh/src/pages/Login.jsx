@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
 import logo from '../assets/logo.png';
+import { ENDPOINTS } from '../config/api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function Login() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8081/api/user/login', {
+      const response = await fetch(ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
