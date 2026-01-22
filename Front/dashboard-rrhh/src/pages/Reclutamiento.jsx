@@ -118,8 +118,10 @@ export default function Reclutamiento() {
                 <td>
                   {suc.desviacion < 0 ? (
                     <span className="badge bg-danger">Requiere reclutar</span>
+                  ) : suc.desviacion === 0 ? (
+                    <span className="badge bg-success">Dotación Cumplida</span>
                   ) : (
-                    <span className="badge bg-success">Sobre dotación</span>
+                    <span className="badge bg-warning text-dark">Sobre dotación</span>
                   )}
                 </td>
                 <td>

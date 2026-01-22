@@ -97,6 +97,7 @@ export default function Home() {
   const totalVendedor24 = empleados.filter(e => e.cargo === 'Operador de tienda 24').length;
   const totalVendedor = empleados.filter(e => e.cargo === 'Operador de tienda').length;
   const totalSubgerente = empleados.filter(e => e.cargo === 'Administrador de tienda Jr').length;
+  const totalAdminTienda = empleados.filter(e => e.cargo === 'Administrador de tienda').length;
 
   return (
     <div className="container mt-4">
@@ -121,7 +122,8 @@ export default function Home() {
               <span>Vendedor PT 16: <strong>{totalVendedor16}</strong></span>
               <span>Vendedor PT 24: <strong>{totalVendedor24}</strong></span>
               <span>Vendedor Full: <strong>{totalVendedor}</strong></span>
-              <span>Administrador de tienda Jr <strong>{totalSubgerente}</strong></span>
+              <span>Administrador de tienda Jr: <strong>{totalSubgerente}</strong></span>
+              <span>Administrador de tienda: <strong>{totalAdminTienda}</strong></span>
             </div>
           </div>
         </div>
