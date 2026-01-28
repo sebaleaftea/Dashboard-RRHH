@@ -15,7 +15,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/all")    gcloud sql import sql gdh-massti gs://desarrollo-gdh/gdhbackup.sql --database=gdh-massti
+    @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.findAll());
     }
