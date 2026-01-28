@@ -25,7 +25,7 @@ RUN addgroup -g 1000 spring && adduser -u 1000 -G spring -s /bin/sh -D spring
 USER spring:spring
 
 # Copiar JAR desde stage de build
-COPY --from=builder /build/target/*.jar app.jar
+COPY --from=builder /build/target/microservice-user-0.0.1-SNAPSHOT.jar app.jar
 
 # Variables de entorno por defecto (se sobreescriben en Cloud Run)
 ENV SPRING_PROFILES_ACTIVE=cloudrun
@@ -39,11 +39,11 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
 # Ejecutar aplicación con optimizaciones JVM
-ENTRYPOINT ["java", \
-  "-Xms256m", \
-  "-Xmx512m", \
-  "-XX:+UseContainerSupport", \
-  "-XX:MaxRAMPercentage=75.0", \
-  "-Djava.security.egd=file:/dev/./urandom", \
-    "-jar", \
-    "target/microservice-user-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", 
+  "-Xms256m", 
+  "-Xmx512m", 
+  "-XX:+UseContainerSupport", 
+  "-XX:MaxRAMPercentage=75.0", 
+  "-Djava.security.egd=file:/dev/./urandom", 
+  "-jar", 
+  "app.jar"]
