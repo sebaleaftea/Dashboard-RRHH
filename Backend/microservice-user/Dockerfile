@@ -45,5 +45,5 @@ ENTRYPOINT ["java", \
   "-XX:+UseContainerSupport", \
   "-XX:MaxRAMPercentage=75.0", \
   "-Djava.security.egd=file:/dev/./urandom", \
-  "-jar", \
-  "app.jar"]
+    "-jar", \
+    "target/microservice-user-0.0.1-SNAPSHOT.jar"]
