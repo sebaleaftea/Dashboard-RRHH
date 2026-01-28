@@ -2,13 +2,15 @@
 """
 ETL script to fetch contracts from Talana and upsert into Cloud SQL Postgres.
 
+
 Usage (Cloud Run): set the following environment variables (recommended):
-  - TALANA_URL: full Talana API URL that returns contracts (supports pagination)
-  - INSTANCE_CONNECTION_NAME: GCP Cloud SQL instance connection name (PROJECT:REGION:INSTANCE)
-  - DB_NAME: database name (default: grh)
-  - SECRET_DB_USER: Secret Manager secret id for DB user (optional)
-  - SECRET_DB_PASS: Secret Manager secret id for DB password (optional)
-  - SECRET_TALANA_TOKEN: Secret Manager secret id for Talana token (optional)
+    - TALANA_URL: full Talana API URL that returns contracts (supports pagination)
+    - INSTANCE_CONNECTION_NAME: GCP Cloud SQL instance connection name (PROJECT:REGION:INSTANCE)
+            Example for new instance: prd-sfh-it-bi-erbi:southamerica-west1:gdh-massti
+    - DB_NAME: database name (default: grh)
+    - SECRET_DB_USER: Secret Manager secret id for DB user (optional)
+    - SECRET_DB_PASS: Secret Manager secret id for DB password (optional)
+    - SECRET_TALANA_TOKEN: Secret Manager secret id for Talana token (optional)
 
 Or provide DB_USER, DB_PASS, TALANA_TOKEN as plain env vars (less secure).
 

@@ -13,7 +13,7 @@ echo ""
 PROJECT_ID="prd-sfh-it-bi-erbi"
 REGION="southamerica-west1"
 SERVICE_NAME="microservice-employee"
-CLOUD_SQL_INSTANCE="prd-sfh-it-bi-erbi:southamerica-west1:bdd-grh"
+CLOUD_SQL_INSTANCE="prd-sfh-it-bi-erbi:southamerica-west1:gdh-massti"
 IMAGE_NAME="gcr.io/$PROJECT_ID/$SERVICE_NAME"
 
 echo "Proyecto: $PROJECT_ID"
