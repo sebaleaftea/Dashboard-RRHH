@@ -57,18 +57,17 @@ export default function Home() {
     // Series diarias para gráficos y ausentismos
     axios.get(`${DB_BASE}/metrics/vacaciones/daily?days=1`).then(res => {
       setSerieVacaciones(res.data);
-      // Si el backend entrega la lista de personas en el último día:
-      if (Array.isArray(res.data) && res.data.length > 0 && res.data[0].personas) {
-        setVacacionesVigentes(res.data[0].personas);
+      // Tomar siempre el último día (hoy) del array
+      if (Array.isArray(res.data) && res.data.length > 0 && res.data[res.data.length-1].personas) {
+        setVacacionesVigentes(res.data[res.data.length-1].personas);
       } else {
-        // Si solo entrega el total, no se puede mostrar el detalle
         setVacacionesVigentes([]);
       }
     });
     axios.get(`${DB_BASE}/metrics/licencias/daily?days=1`).then(res => {
       setSerieLicencias(res.data);
-      if (Array.isArray(res.data) && res.data.length > 0 && res.data[0].personas) {
-        setLicenciasVigentes(res.data[0].personas);
+      if (Array.isArray(res.data) && res.data.length > 0 && res.data[res.data.length-1].personas) {
+        setLicenciasVigentes(res.data[res.data.length-1].personas);
       } else {
         setLicenciasVigentes([]);
       }
