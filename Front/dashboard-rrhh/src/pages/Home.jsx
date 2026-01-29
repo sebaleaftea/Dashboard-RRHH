@@ -1,9 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import GraficoRangoEtareo from '../components/GraficoRangoEtareo';
 import GraficoGenero from '../components/GraficoGenero';
 import GraficoDiscapacidad from '../components/GraficoDiscapacidad';
 import GraficoSerieDiaria from '../components/GraficoSerieDiaria';
+import ModalLista from '../components/ModalLista';
 import { normalizarCargo } from '../utils/cargos';
 import { API_URLS } from '../config/api';
 
@@ -28,12 +30,19 @@ export default function Home() {
   const [stats, setStats] = useState(null);
   const [serieVacaciones, setSerieVacaciones] = useState([]);
   const [serieLicencias, setSerieLicencias] = useState([]);
+  // Ausentismos
+  const [vacacionesVigentes, setVacacionesVigentes] = useState([]);
+  const [licenciasVigentes, setLicenciasVigentes] = useState([]);
+  const [modalAusentismo, setModalAusentismo] = useState({ show: false, tipo: '', data: [] });
 
   useEffect(() => {
     // Contratos activos para dotación y cargos
     axios.get(API_URL).then(res => {
       const items = Array.isArray(res.data) ? res.data : [];
       const empleadosActivos = items.map(it => ({
+        id: it.empleadoId,
+        rut: it.rut,
+        nombre: it.nombre,
         sucursal: it.sucursalNombre || 'Sin sucursal',
         cargo: normalizarCargo(it.cargo),
         sexo: it.sexo || null,
@@ -45,9 +54,25 @@ export default function Home() {
 
     // Stats generales (incluye métricas de hoy)
     axios.get(`${DB_BASE}/stats`).then(res => setStats(res.data));
-    // Series diarias para gráficos
-    axios.get(`${DB_BASE}/metrics/vacaciones/daily?days=14`).then(res => setSerieVacaciones(res.data));
-    axios.get(`${DB_BASE}/metrics/licencias/daily?days=14`).then(res => setSerieLicencias(res.data));
+    // Series diarias para gráficos y ausentismos
+    axios.get(`${DB_BASE}/metrics/vacaciones/daily?days=1`).then(res => {
+      setSerieVacaciones(res.data);
+      // Si el backend entrega la lista de personas en el último día:
+      if (Array.isArray(res.data) && res.data.length > 0 && res.data[0].personas) {
+        setVacacionesVigentes(res.data[0].personas);
+      } else {
+        // Si solo entrega el total, no se puede mostrar el detalle
+        setVacacionesVigentes([]);
+      }
+    });
+    axios.get(`${DB_BASE}/metrics/licencias/daily?days=1`).then(res => {
+      setSerieLicencias(res.data);
+      if (Array.isArray(res.data) && res.data.length > 0 && res.data[0].personas) {
+        setLicenciasVigentes(res.data[0].personas);
+      } else {
+        setLicenciasVigentes([]);
+      }
+    });
   }, []);
 
   // Rango etario
@@ -156,15 +181,43 @@ export default function Home() {
       <div className="row g-4 mt-4">
         <div className="col-md-6">
           <div className="p-3 border rounded bg-white">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="fw-bold">Vacaciones vigentes: {Array.isArray(vacacionesVigentes) ? vacacionesVigentes.length : 0}</span>
+              <button className="btn btn-sm btn-outline-info" onClick={() => setModalAusentismo({ show: true, tipo: 'vacaciones', data: vacacionesVigentes })} disabled={!vacacionesVigentes.length}>
+                Ver detalle
+              </button>
+            </div>
             <GraficoSerieDiaria title="Vacaciones (últimos 14 días)" data={serieVacaciones} color="#5ab67dff" />
           </div>
         </div>
         <div className="col-md-6">
           <div className="p-3 border rounded bg-white">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="fw-bold">Licencias vigentes: {Array.isArray(licenciasVigentes) ? licenciasVigentes.length : 0}</span>
+              <button className="btn btn-sm btn-outline-warning" onClick={() => setModalAusentismo({ show: true, tipo: 'licencias', data: licenciasVigentes })} disabled={!licenciasVigentes.length}>
+                Ver detalle
+              </button>
+            </div>
             <GraficoSerieDiaria title="Licencias (últimos 14 días)" data={serieLicencias} color="#e38b00" />
           </div>
         </div>
       </div>
+
+      {/* Modal detalle ausentismos */}
+      {modalAusentismo.show && (
+        <ModalLista
+          show={modalAusentismo.show}
+          onClose={() => setModalAusentismo({ show: false, tipo: '', data: [] })}
+          title={modalAusentismo.tipo === 'vacaciones' ? 'Personas con vacaciones vigentes' : 'Personas con licencias vigentes'}
+          items={modalAusentismo.data.map(a => ({
+            ...a,
+            tipo: undefined // no mostrar columna tipo
+          }))}
+          tipo={modalAusentismo.tipo}
+        >
+          {/* Custom columns for modal */}
+        </ModalLista>
+      )}
     </div>
   );
 }
