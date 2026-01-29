@@ -4,45 +4,45 @@ import axios from 'axios';
 import { normalizarCargo } from '../utils/cargos';
 import { API_URLS } from '../config/api';
 
-// Utilidad para obtener ausentismos por empleados
-async function fetchAusentismosPorEmpleados(empleados) {
+// Utilidad para obtener ausentismos por sucursal (vacaciones y licencias vigentes)
+async function fetchAusentismosPorSucursal(sucursalNombre) {
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
-  const ausentes = [];
-  for (const emp of empleados) {
-    try {
-      // Vacaciones
-      const vacRes = await axios.get(`${API_URLS.EMPLOYEE_SERVICE}/api/db/empleados/${emp.id}/vacaciones`);
-      if (Array.isArray(vacRes.data)) {
-        const vigente = vacRes.data.find(v => {
-          const desde = new Date(v.desde);
-          const hasta = new Date(v.hasta || v.retorno);
-          desde.setHours(0, 0, 0, 0);
-          hasta.setHours(0, 0, 0, 0);
-          return hoy >= desde && hoy <= hasta;
-        });
-        if (vigente) {
-          ausentes.push({ nombre: emp.nombre, rut: emp.rut, tipo: 'Vacaciones' });
-        }
-      }
-      // Licencias
-      const licRes = await axios.get(`${API_URLS.EMPLOYEE_SERVICE}/api/db/empleados/${emp.id}/licencias`);
-      if (Array.isArray(licRes.data)) {
-        const vigente = licRes.data.find(l => {
-          const desde = new Date(l.desde);
-          const hasta = new Date(l.hasta);
-          desde.setHours(0, 0, 0, 0);
-          hasta.setHours(0, 0, 0, 0);
-          return hoy >= desde && hoy <= hasta;
-        });
-        if (vigente) {
-          ausentes.push({ nombre: emp.nombre, rut: emp.rut, tipo: 'Licencia' });
-        }
-      }
-    } catch (err) {
-      // Ignorar errores individuales
-    }
-  }
+  // Traer vacaciones y licencias vigentes de hoy
+  const [vacRes, licRes] = await Promise.all([
+    axios.get(`${API_URLS.EMPLOYEE_SERVICE}/api/db/metrics/vacaciones/daily?days=1`),
+    axios.get(`${API_URLS.EMPLOYEE_SERVICE}/api/db/metrics/licencias/daily?days=1`)
+  ]);
+  const vacaciones = Array.isArray(vacRes.data) && vacRes.data.length > 0 && vacRes.data[0].personas ? vacRes.data[0].personas : [];
+  const licencias = Array.isArray(licRes.data) && licRes.data.length > 0 && licRes.data[0].personas ? licRes.data[0].personas : [];
+  // Filtrar por sucursal
+  // Solo los ausentismos vigentes (hoy dentro del rango)
+  const isVigente = (desde, hasta, retorno) => {
+    const d = desde ? new Date(desde) : null;
+    const h = hasta ? new Date(hasta) : null;
+    const r = retorno ? new Date(retorno) : null;
+    if (!d) return false;
+    // Si no hay hasta, usar retorno
+    const fin = h || r;
+    if (!fin) return hoy >= d;
+    return hoy >= d && hoy <= fin;
+  };
+  const ausentes = [
+    ...vacaciones.filter(v => (v.sucursal || 'Sin sucursal') === (sucursalNombre || 'Sin sucursal') && isVigente(v.desde, v.hasta, v.retorno)).map(v => ({
+      nombre: v.nombre,
+      sucursal: v.sucursal,
+      desde: v.desde,
+      hasta: v.hasta,
+      tipo: 'Vacaciones'
+    })),
+    ...licencias.filter(l => (l.sucursal || 'Sin sucursal') === (sucursalNombre || 'Sin sucursal') && isVigente(l.desde, l.hasta)).map(l => ({
+      nombre: l.nombre,
+      sucursal: l.sucursal,
+      desde: l.desde,
+      hasta: l.hasta,
+      tipo: 'Licencia'
+    }))
+  ];
   return ausentes;
 }
 
@@ -207,15 +207,8 @@ export default function Reclutamiento() {
                   <button
                     className="btn btn-sm btn-warning"
                     onClick={async () => {
-                      // Obtener ausentismos de los empleados de la sucursal
-                      const empleados = suc.empleados || [];
-                      // Si no hay datos de empleados, no mostrar modal
-                      if (!empleados.length) {
-                        setModalAusentismos({ show: true, data: [], sucursal: suc.nombre });
-                        return;
-                      }
-                      // Obtener ausentismos
-                      const ausentes = await fetchAusentismosPorEmpleados(empleados);
+                      // Obtener ausentismos por sucursal (vacaciones y licencias vigentes)
+                      const ausentes = await fetchAusentismosPorSucursal(suc.nombre);
                       setModalAusentismos({ show: true, data: ausentes, sucursal: suc.nombre });
                     }}
                   >
@@ -276,7 +269,7 @@ export default function Reclutamiento() {
       {/* Modal de ausentismos */}
       {modalAusentismos.show && (
         <div className="modal show d-block" tabIndex="-1" style={{ background: 'rgba(0,0,0,0.3)' }}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Ausentismos - {modalAusentismos.sucursal}</h5>
@@ -290,7 +283,9 @@ export default function Reclutamiento() {
                     <thead>
                       <tr>
                         <th>Nombre</th>
-                        <th>RUT</th>
+                        <th>Sucursal</th>
+                        <th>Desde</th>
+                        <th>Hasta</th>
                         <th>Tipo</th>
                       </tr>
                     </thead>
@@ -298,7 +293,9 @@ export default function Reclutamiento() {
                       {modalAusentismos.data.map((a, i) => (
                         <tr key={i}>
                           <td>{a.nombre}</td>
-                          <td>{a.rut}</td>
+                          <td>{a.sucursal}</td>
+                          <td>{a.desde ? new Date(a.desde).toLocaleDateString('es-CL') : ''}</td>
+                          <td>{a.hasta ? new Date(a.hasta).toLocaleDateString('es-CL') : ''}</td>
                           <td>{a.tipo}</td>
                         </tr>
                       ))}

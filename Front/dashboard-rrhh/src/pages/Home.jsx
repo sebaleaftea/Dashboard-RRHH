@@ -206,7 +206,7 @@ export default function Home() {
       {/* Modal detalle ausentismos */}
       {modalAusentismo.show && (
         <div className="modal show d-block" tabIndex="-1" style={{ background: 'rgba(0,0,0,0.3)' }}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
