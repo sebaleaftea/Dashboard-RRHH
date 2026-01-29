@@ -347,7 +347,7 @@ public class DatabaseController {
     ) {
         LocalDate ayer = LocalDate.now().minusDays(1);
         LocalDate fin = ayer.plusDays(days);
-        String sql = """
+        String fechasSql = """
             WITH RECURSIVE fechas AS (
                 SELECT ?::date AS fecha
                 UNION ALL
@@ -355,16 +355,38 @@ public class DatabaseController {
                 FROM fechas
                 WHERE fecha < ?::date
             )
+            SELECT fecha FROM fechas ORDER BY fecha
+        """;
+        List<Map<String, Object>> fechas = jdbcTemplate.queryForList(fechasSql, Date.valueOf(ayer), Date.valueOf(fin));
+        // Para cada fecha, obtener total y personas
+        String personasSql = """
             SELECT 
-                f.fecha,
-                COUNT(v.id) AS total
-            FROM fechas f
-            LEFT JOIN vacaciones v ON f.fecha >= v.desde::date 
-                                   AND f.fecha <= COALESCE(v.hasta::date, v.retorno::date)
-            GROUP BY f.fecha
-            ORDER BY f.fecha
-            """;
-        return jdbcTemplate.queryForList(sql, Date.valueOf(ayer), Date.valueOf(fin));
+                e.nombre || ' ' || e.ap_paterno as nombre,
+                e.rut as rut,
+                COALESCE(s.nombre, 'Sin sucursal') as sucursal,
+                v.desde,
+                COALESCE(v.hasta, v.retorno) as hasta
+            FROM vacaciones v
+            INNER JOIN empleado e ON v.empleado_id = e.id
+            LEFT JOIN LATERAL (
+                SELECT c.sucursal_id
+                FROM contrato c
+                WHERE c.empleado_id = e.id AND c.vigente = true
+                ORDER BY c.fecha_contratacion DESC NULLS LAST
+                LIMIT 1
+            ) contrato_vigente ON true
+            LEFT JOIN sucursal s ON contrato_vigente.sucursal_id = s.id
+            WHERE ?::date >= v.desde::date AND ?::date <= COALESCE(v.hasta::date, v.retorno::date)
+        """;
+        return fechas.stream().map(f -> {
+            LocalDate fecha = ((Date) f.get("fecha")).toLocalDate();
+            List<Map<String, Object>> personas = jdbcTemplate.queryForList(personasSql, Date.valueOf(fecha), Date.valueOf(fecha));
+            return Map.of(
+                "fecha", fecha.toString(),
+                "total", personas.size(),
+                "personas", personas
+            );
+        }).toList();
     }
 
     /**
@@ -430,7 +452,7 @@ public class DatabaseController {
     ) {
         LocalDate ayer = LocalDate.now().minusDays(1);
         LocalDate fin = ayer.plusDays(days);
-        String sql = """
+        String fechasSql = """
             WITH RECURSIVE fechas AS (
                 SELECT ?::date AS fecha
                 UNION ALL
@@ -438,16 +460,37 @@ public class DatabaseController {
                 FROM fechas
                 WHERE fecha < ?::date
             )
+            SELECT fecha FROM fechas ORDER BY fecha
+        """;
+        List<Map<String, Object>> fechas = jdbcTemplate.queryForList(fechasSql, Date.valueOf(ayer), Date.valueOf(fin));
+        String personasSql = """
             SELECT 
-                f.fecha,
-                COUNT(l.id) AS total
-            FROM fechas f
-            LEFT JOIN licencias l ON f.fecha >= l.desde::date 
-                                  AND f.fecha <= l.hasta::date
-            GROUP BY f.fecha
-            ORDER BY f.fecha
-            """;
-        return jdbcTemplate.queryForList(sql, Date.valueOf(ayer), Date.valueOf(fin));
+                e.nombre || ' ' || e.ap_paterno as nombre,
+                e.rut as rut,
+                COALESCE(s.nombre, 'Sin sucursal') as sucursal,
+                l.desde,
+                l.hasta
+            FROM licencias l
+            INNER JOIN empleado e ON l.empleado_id = e.id
+            LEFT JOIN LATERAL (
+                SELECT c.sucursal_id
+                FROM contrato c
+                WHERE c.empleado_id = e.id AND c.vigente = true
+                ORDER BY c.fecha_contratacion DESC NULLS LAST
+                LIMIT 1
+            ) contrato_vigente ON true
+            LEFT JOIN sucursal s ON contrato_vigente.sucursal_id = s.id
+            WHERE ?::date >= l.desde::date AND ?::date <= l.hasta::date
+        """;
+        return fechas.stream().map(f -> {
+            LocalDate fecha = ((Date) f.get("fecha")).toLocalDate();
+            List<Map<String, Object>> personas = jdbcTemplate.queryForList(personasSql, Date.valueOf(fecha), Date.valueOf(fecha));
+            return Map.of(
+                "fecha", fecha.toString(),
+                "total", personas.size(),
+                "personas", personas
+            );
+        }).toList();
     }
 
     /**
