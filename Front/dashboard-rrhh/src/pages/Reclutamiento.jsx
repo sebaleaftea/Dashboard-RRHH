@@ -13,8 +13,11 @@ async function fetchAusentismosPorSucursal(sucursalNombre) {
     axios.get(`${API_URLS.EMPLOYEE_SERVICE}/api/db/metrics/vacaciones/daily?days=1`),
     axios.get(`${API_URLS.EMPLOYEE_SERVICE}/api/db/metrics/licencias/daily?days=1`)
   ]);
-  const vacaciones = Array.isArray(vacRes.data) && vacRes.data.length > 0 && vacRes.data[0].personas ? vacRes.data[0].personas : [];
-  const licencias = Array.isArray(licRes.data) && licRes.data.length > 0 && licRes.data[0].personas ? licRes.data[0].personas : [];
+  // Tomar siempre el último día (hoy) del array, no el primero
+  const vacacionesArr = Array.isArray(vacRes.data) ? vacRes.data : [];
+  const licenciasArr = Array.isArray(licRes.data) ? licRes.data : [];
+  const vacaciones = vacacionesArr.length > 0 && vacacionesArr[vacacionesArr.length-1].personas ? vacacionesArr[vacacionesArr.length-1].personas : [];
+  const licencias = licenciasArr.length > 0 && licenciasArr[licenciasArr.length-1].personas ? licenciasArr[licenciasArr.length-1].personas : [];
   // Filtrar por sucursal
   // Solo los ausentismos vigentes (hoy dentro del rango)
   const isVigente = (desde, hasta, retorno) => {
