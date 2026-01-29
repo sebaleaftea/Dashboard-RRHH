@@ -205,18 +205,44 @@ export default function Home() {
 
       {/* Modal detalle ausentismos */}
       {modalAusentismo.show && (
-        <ModalLista
-          show={modalAusentismo.show}
-          onClose={() => setModalAusentismo({ show: false, tipo: '', data: [] })}
-          title={modalAusentismo.tipo === 'vacaciones' ? 'Personas con vacaciones vigentes' : 'Personas con licencias vigentes'}
-          items={modalAusentismo.data.map(a => ({
-            ...a,
-            tipo: undefined // no mostrar columna tipo
-          }))}
-          tipo={modalAusentismo.tipo}
-        >
-          {/* Custom columns for modal */}
-        </ModalLista>
+        <div className="modal show d-block" tabIndex="-1" style={{ background: 'rgba(0,0,0,0.3)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {modalAusentismo.tipo === 'vacaciones' ? 'Personas con vacaciones vigentes' : 'Personas con licencias vigentes'}
+                </h5>
+                <button type="button" className="btn-close" onClick={() => setModalAusentismo({ show: false, tipo: '', data: [] })}></button>
+              </div>
+              <div className="modal-body">
+                {modalAusentismo.data.length === 0 ? (
+                  <div className="alert alert-info">No hay personas con ausentismo vigente.</div>
+                ) : (
+                  <table className="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Sucursal</th>
+                        <th>Desde</th>
+                        <th>Hasta</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {modalAusentismo.data.map((a, i) => (
+                        <tr key={i}>
+                          <td>{a.nombre}</td>
+                          <td>{a.sucursal}</td>
+                          <td>{a.desde ? new Date(a.desde).toLocaleDateString('es-CL') : ''}</td>
+                          <td>{a.hasta ? new Date(a.hasta).toLocaleDateString('es-CL') : ''}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

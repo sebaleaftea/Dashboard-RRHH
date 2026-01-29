@@ -365,7 +365,10 @@ public class DatabaseController {
                 e.rut as rut,
                 COALESCE(s.nombre, 'Sin sucursal') as sucursal,
                 v.desde,
-                COALESCE(v.hasta, v.retorno) as hasta
+                v.hasta,
+                v.retorno,
+                v.dias,
+                v.tipo
             FROM vacaciones v
             INNER JOIN empleado e ON v.empleado_id = e.id
             LEFT JOIN LATERAL (
